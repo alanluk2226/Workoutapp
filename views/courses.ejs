@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Courses - Fitness App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .courses-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .course-card {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 255, 127, 0.1);
+            border-left: 4px solid #00ff7f;
+            border: 1px solid rgba(0, 255, 127, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 127, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0, 255, 127, 0.2);
+            border-color: rgba(0, 255, 127, 0.4);
+        }
+        
+        .course-card:hover::before {
+            left: 100%;
+        }
+        
+        .course-card h3 {
+            color: #00ff7f !important;
+            text-shadow: 0 0 5px rgba(0, 255, 127, 0.3);
+        }
+        
+        .course-card p {
+            color: #e0e0e0;
+        }
+        
+        .course-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .course-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #000;
+            text-shadow: none;
+        }
+        
+        .yoga { background: linear-gradient(135deg, #ff69b4, #ff1493); }
+        .bodyweight { background: linear-gradient(135deg, #00ffff, #0080ff); }
+        .hii { background: linear-gradient(135deg, #5ecf97, #2ed573); }
+        .circuittraining { background: linear-gradient(135deg, #a4c220, #7cb342); }
+        .pilates { background: linear-gradient(135deg, #a470f7, #8e44ad); }
+        .cardiokickboxing { background: linear-gradient(135deg, #e65b95, #e91e63); }
+        .zumba { background: linear-gradient(135deg, #a57e2a, #d4af37); }
+        
+        .course-schedule {
+            background: rgba(0, 255, 127, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid rgba(0, 255, 127, 0.2);
+            color: #e0e0e0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .course-schedule strong {
+            color: #00ff7f;
+        }
+        
+        .coach-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 255, 127, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 127, 0.2);
+            transform: translateZ(0);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .coach-info strong {
+            color: #00ff7f;
+        }
+        
+        .coach-info a {
+            color: #00ff7f !important;
+            text-decoration: none;
+        }
+        
+        .coach-info a:hover {
+            text-shadow: 0 0 5px rgba(0, 255, 127, 0.5);
+        }
+        
+        .coach-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0, 255, 127, 0.3);
+        }
+        
+        .enroll-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #00ff7f, #00cc66);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .enroll-btn:hover {
+            background: linear-gradient(135deg, #00cc66, #00ff7f);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 127, 0.3);
+        }
+        
+        .enroll-btn:disabled {
+            background: rgba(128, 128, 128, 0.5);
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .filter-section {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 255, 127, 0.1);
+            border: 1px solid rgba(0, 255, 127, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .filter-section h3 {
+            color: #00ff7f;
+            text-shadow: 0 0 5px rgba(0, 255, 127, 0.3);
+        }
+        
+        .filter-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(0, 255, 127, 0.3);
+            background: rgba(0, 0, 0, 0.7);
+            color: #00ff7f;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .filter-btn:hover {
+            background: rgba(0, 255, 127, 0.1);
+            border-color: rgba(0, 255, 127, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, #00ff7f, #00cc66);
+            color: #000;
+            border-color: #00ff7f;
+            box-shadow: 0 4px 15px rgba(0, 255, 127, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-brand">🏋️ Fitness Tracker</div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/courses" class="nav-link">Courses</a>
+                <a href="/my-courses" class="nav-link">My Courses</a>
+                <a href="/create" class="nav-link">Workouts</a>
+                <% if (user) { %>
+                    <div class="user-info">
+                        <span>Welcome, <%= user.username %>!</span>
+                        <a href="/logout" class="btn btn-danger">Logout</a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="nav-link">Login</a>
+                <% } %>
+            </div>
+        </nav>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Fitness Courses 🏃‍♀️</h1>
+                <p>Join our expert-led fitness classes and achieve your goals</p>
+            </div>
+
+            <!-- 篩選部分 -->
+            <div class="filter-section">
+                <h3>Filter by Activity Type</h3>
+                <div class="filter-options">
+                    <button class="filter-btn active" data-type="all">All Courses</button>
+                    <button class="filter-btn" data-type="yoga">Yoga</button>
+                    <button class="filter-btn" data-type="bodyweight">Body Weight</button>
+                    <button class="filter-btn" data-type="hii">HIIT</button>
+                    <button class="filter-btn" data-type="circuittraining">Circuit Training</button>
+                    <button class="filter-btn" data-type="pilates">Pilates</button>
+                    <button class="filter-btn" data-type="cardiokickboxing">Cardio Kickboxing</button>
+                    <button class="filter-btn" data-type="zumba">Zumba</button>
+                </div>
+            </div>
+
+            <!-- 課程列表 -->
+            <div id="coursesList" class="courses-container">
+                <div style="text-align: center; padding: 2rem; grid-column: 1 / -1;">
+                    <p>Loading courses...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allCourses = [];
+        
+        // 載入課程
+        async function loadCourses() {
+            try {
+                const response = await fetch('/api/courses');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allCourses = data.courses;
+                    displayCourses(allCourses);
+                }
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                document.getElementById('coursesList').innerHTML = `
+                    <div style="text-align: center; color: red; grid-column: 1 / -1;">
+                        Error loading courses. Please try again.
+                    </div>
+                `;
+            }
+        }
+        
+        // 顯示課程
+        function displayCourses(courses) {
+            const container = document.getElementById('coursesList');
+            
+            if (courses.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; grid-column: 1 / -1;">
+                        <h3>No courses available</h3>
+                        <p>Check back later for new courses!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = courses.map(course => `
+                <div class="course-card" data-type="${course.type}">
+                    <div class="course-header">
+                        <h3 style="margin: 0; flex: 1;">${course.name}</h3>
+                        <span class="course-type ${course.type}">${course.type.toUpperCase()}</span>
+                    </div>
+                    
+                    <div class="course-schedule">
+                        <strong>Schedule:</strong><br>
+                        ${formatDay(course.schedule.day)}<br>
+                        ${course.schedule.startTime} - ${course.schedule.endTime}
+                    </div>
+                    
+                    <div class="coach-info">
+                        <img src="${course.coach.image || '/images/default-coach.jpg'}" 
+                             alt="${course.coach.name}" 
+                             class="coach-avatar"
+                             onerror="this.src='/images/default-coach.jpg'">
+                        <div>
+                            <strong>Coach: ${course.coach.name}</strong><br>
+                            <a href="/coach/${course.coach._id}" style="color: #667eea; text-decoration: none;">
+                                View Profile →
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <p>${course.description || 'Join this amazing fitness class!'}</p>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                        <span style="color: #666;">
+                            ${course.currentParticipants}/${course.maxParticipants} enrolled
+                        </span>
+                        <button class="enroll-btn" onclick="enrollCourse('${course._id}')" 
+                                ${course.currentParticipants >= course.maxParticipants ? 'disabled' : ''}>
+                            ${course.currentParticipants >= course.maxParticipants ? 'Full' : 'Enroll Now'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 格式化星期幾
+        function formatDay(day) {
+            const days = {
+                monday: 'Monday',
+                tuesday: 'Tuesday',
+                wednesday: 'Wednesday',
+                thursday: 'Thursday',
+                friday: 'Friday',
+                saturday: 'Saturday',
+                sunday: 'Sunday'
+            };
+            return days[day] || day;
+        }
+        
+        // 註冊課程
+        async function enrollCourse(courseId) {
+            <% if (!user) { %>
+                alert('Please login to enroll in courses');
+                window.location.href = '/login';
+                return;
+            <% } %>
+            
+            if (!confirm('Are you sure you want to enroll in this course?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/courses/${courseId}/enroll`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Successfully enrolled in the course!');
+                    loadCourses(); // 重新載入課程列表
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Enroll error:', error);
+                alert('Error enrolling in course. Please try again.');
+            }
+        }
+        
+        // 篩選功能
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCourses();
+            
+            // 篩選按鈕事件
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 更新活躍狀態
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filterType = this.dataset.type;
+                    
+                    if (filterType === 'all') {
+                        displayCourses(allCourses);
+                    } else {
+                        const filteredCourses = allCourses.filter(course => course.type === filterType);
+                        displayCourses(filteredCourses);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>
+                    <span class="footer-icon">📧</span>
+                    <a href="mailto:alanluk2226@gmail.com">alanluk2226@gmail.com</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Alan Workout</h4>
+                <p>Your fitness journey starts here</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Your Progress</h4>
+                <p>Track workouts, join courses, achieve goals</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Alan Workout. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/navigation.js"></script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

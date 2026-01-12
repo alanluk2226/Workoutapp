@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Fitness App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .coach-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .coach-header {
+            display: flex;
+            gap: var(--space-xl);
+            align-items: flex-start;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .coach-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--color-neon-green);
+            box-shadow: var(--shadow-neon);
+            transition: all var(--duration-fast) var(--ease-standard);
+        }
+        
+        .coach-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 127, 0.5);
+        }
+        
+        .coach-details {
+            flex: 1;
+        }
+        
+        .coach-details h1 {
+            color: var(--color-neon-green) !important;
+            text-shadow: 0 0 10px rgba(0, 255, 127, 0.3);
+            font-weight: var(--font-weight-semibold);
+            margin: 0 0 var(--space-sm) 0 !important;
+        }
+        
+        .coach-details p {
+            color: var(--color-text-light) !important;
+            margin: 0 0 var(--space-md) 0 !important;
+            line-height: var(--line-height-base);
+        }
+        
+        .coach-details strong {
+            color: var(--color-neon-green);
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        .employment-badge {
+            display: inline-block;
+            padding: var(--space-xs) var(--space-sm);
+            background: linear-gradient(135deg, var(--color-neon-green), #00cc66);
+            color: #000;
+            border-radius: var(--radius-xl);
+            font-size: 0.75rem;
+            font-weight: var(--font-weight-semibold);
+            margin-left: var(--space-md);
+            text-transform: uppercase;
+            letter-spacing: var(--letter-spacing-wide);
+        }
+        
+        .specializations {
+            display: flex;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            margin: var(--space-md) 0;
+        }
+        
+        .specialization-tag {
+            padding: var(--space-xs) var(--space-sm);
+            background: rgba(0, 255, 127, 0.1);
+            border: 1px solid rgba(0, 255, 127, 0.3);
+            border-radius: var(--radius-xl);
+            font-size: 0.75rem;
+            font-weight: var(--font-weight-medium);
+            color: var(--color-neon-green);
+            text-transform: uppercase;
+            letter-spacing: var(--letter-spacing-wide);
+            transition: all var(--duration-fast) var(--ease-standard);
+        }
+        
+        .specialization-tag:hover {
+            background: rgba(0, 255, 127, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .contact-info {
+            background: var(--color-card-bg) !important;
+            border: 1px solid rgba(0, 255, 127, 0.2);
+            padding: var(--space-lg) !important;
+            border-radius: var(--radius-lg) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md), 0 4px 12px rgba(0, 255, 127, 0.1);
+            margin: var(--space-xl) 0;
+            transition: all var(--duration-moderate) var(--ease-standard);
+        }
+        
+        .contact-info:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg), 0 8px 20px rgba(0, 255, 127, 0.2);
+        }
+        
+        .contact-info h3 {
+            color: var(--color-neon-green) !important;
+            text-shadow: 0 0 5px rgba(0, 255, 127, 0.3);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--space-md) !important;
+        }
+        
+        .contact-info p {
+            color: var(--color-text-light) !important;
+            margin: var(--space-sm) 0 !important;
+            line-height: var(--line-height-base);
+        }
+        
+        .contact-info strong {
+            color: var(--color-neon-green) !important;
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        .courses-section {
+            margin-top: var(--space-xl);
+        }
+        
+        .courses-section h3 {
+            color: var(--color-neon-green) !important;
+            text-shadow: 0 0 5px rgba(0, 255, 127, 0.3);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--space-lg) !important;
+        }
+        
+        .course-item {
+            background: var(--color-card-bg) !important;
+            border: 1px solid rgba(0, 255, 127, 0.2);
+            padding: var(--space-lg) !important;
+            margin: var(--space-md) 0 !important;
+            border-radius: var(--radius-lg) !important;
+            border-left: 4px solid var(--color-neon-green) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md), 0 4px 12px rgba(0, 255, 127, 0.1);
+            transition: all var(--duration-moderate) var(--ease-standard);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .course-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 127, 0.1), transparent);
+            transition: left var(--duration-slow) var(--ease-emphasized);
+        }
+        
+        .course-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--shadow-lg), 0 8px 20px rgba(0, 255, 127, 0.2);
+            border-color: rgba(0, 255, 127, 0.4);
+        }
+        
+        .course-item:hover::before {
+            left: 100%;
+        }
+        
+        .course-item h4 {
+            color: var(--color-neon-green) !important;
+            text-shadow: 0 0 5px rgba(0, 255, 127, 0.3);
+            font-weight: var(--font-weight-semibold);
+            margin: 0 0 var(--space-sm) 0 !important;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .course-item p {
+            color: var(--color-text-light) !important;
+            margin: 0 0 var(--space-sm) 0 !important;
+            line-height: var(--line-height-base);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .course-item strong {
+            color: var(--color-neon-green) !important;
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        /* Experience section styling */
+        .coach-details > div {
+            color: var(--color-text-light) !important;
+            margin-top: var(--space-md) !important;
+        }
+        
+        .coach-details > div strong {
+            color: var(--color-neon-green) !important;
+            font-weight: var(--font-weight-semibold);
+        }
+        
+        /* Responsive design for coach page */
+        @media (max-width: 768px) {
+            .coach-header {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--space-lg);
+            }
+            
+            .coach-avatar {
+                width: 120px;
+                height: 120px;
+                align-self: center;
+            }
+            
+            .specializations {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-brand">🏋️ Fitness Tracker</div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/courses" class="nav-link">Courses</a>
+                <a href="/my-courses" class="nav-link">My Courses</a>
+                <a href="/create" class="nav-link">Workouts</a>
+                <% if (user) { %>
+                    <div class="user-info">
+                        <span>Welcome, <%= user.username %>!</span>
+                        <a href="/logout" class="btn btn-danger">Logout</a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="nav-link">Login</a>
+                <% } %>
+            </div>
+        </nav>
+
+        <div class="card">
+            <div class="coach-container">
+                <div class="coach-header">
+                    <img src="<%= coach.image || '/images/default-coach.jpg' %>" 
+                         alt="<%= coach.name %>" 
+                         class="coach-avatar"
+                         onerror="this.src='/images/default-coach.jpg'">
+                    <div class="coach-details">
+                        <h1 style="margin: 0 0 0.5rem 0; color: var(--color-neon-green) !important;">
+                            <%= coach.name %>
+                            <span class="employment-badge"><%= coach.employmentType %></span>
+                        </h1>
+                        <p style="color: var(--color-text-light) !important; margin: 0 0 1rem 0;"><%= coach.bio %></p>
+                        
+                        <div class="specializations">
+                            <% coach.specialization.forEach(spec => { %>
+                                <span class="specialization-tag"><%= spec.toUpperCase() %></span>
+                            <% }); %>
+                        </div>
+                        
+                        <div style="margin-top: 1rem; color: var(--color-text-light) !important;">
+                            <strong style="color: var(--color-neon-green) !important;">Experience:</strong> <%= coach.experience %>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-info" style="background: var(--color-card-bg) !important; padding: var(--space-lg) !important; border-radius: var(--radius-lg) !important;">
+                    <h3 style="color: var(--color-neon-green) !important;">Contact Information</h3>
+                    <p style="color: var(--color-text-light) !important;"><strong style="color: var(--color-neon-green) !important;">Email:</strong> <%= coach.email %></p>
+                    <% if (coach.phone) { %>
+                        <p style="color: var(--color-text-light) !important;"><strong style="color: var(--color-neon-green) !important;">Phone:</strong> <%= coach.phone %></p>
+                    <% } %>
+                </div>
+                
+                <% if (courses.length > 0) { %>
+                    <div class="courses-section">
+                        <h3 style="color: var(--color-neon-green) !important;">Courses by <%= coach.name %></h3>
+                        <% courses.forEach(course => { %>
+                            <div class="course-item">
+                                <h4 style="margin: 0 0 0.5rem 0; color: var(--color-neon-green) !important;"><%= course.name %></h4>
+                                <p style="margin: 0 0 0.5rem 0; color: var(--color-text-light) !important;">
+                                    <strong style="color: var(--color-neon-green) !important;">Schedule:</strong> 
+                                    <%= course.schedule.day.charAt(0).toUpperCase() + course.schedule.day.slice(1) %> 
+                                    <%= course.schedule.startTime %> - <%= course.schedule.endTime %>
+                                </p>
+                                <p style="margin: 0; color: var(--color-text-light) !important;"><%= course.description %></p>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="/courses" class="btn btn-primary">Browse All Courses</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>
+                    <span class="footer-icon">📧</span>
+                    <a href="mailto:alanluk2226@gmail.com">alanluk2226@gmail.com</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Alan Workout</h4>
+                <p>Your fitness journey starts here</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Your Progress</h4>
+                <p>Track workouts, join courses, achieve goals</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Alan Workout. All Rights Reserved.</p>
+        </div>
+    </footer>
+    
+    <script src="/js/navigation.js"></script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

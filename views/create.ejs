@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Fitness App</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-brand">🏋️ Fitness Tracker</div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/read" class="nav-link">My Workouts</a>
+                <% if (user) { %>
+                    <div class="user-info">
+                        <span>Welcome, <%= user.username %>!</span>
+                        <a href="/logout" class="btn btn-danger">Logout</a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="nav-link">Login</a>
+                <% } %>
+            </div>
+        </nav>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Create New Workout 💪</h1>
+                <p>Log your exercise and track your progress</p>
+            </div>
+
+            <form id="workoutForm">
+                <!-- 基本資訊 -->
+                <div class="form-group">
+                    <label class="form-label" for="exerciseName">Choose Sport *</label>
+                    <select class="form-control" id="exerciseName" name="exerciseName" required>
+                        <option value="">Select a sport/exercise</option>
+                        
+                        <!-- Cardio Sports -->
+                        <optgroup label="🏃 Cardio Sports">
+                            <option value="Running" data-type="cardio" data-fields="distance,pace">Running</option>
+                            <option value="Walking" data-type="cardio" data-fields="distance,pace">Walking</option>
+                            <option value="Cycling" data-type="cardio" data-fields="distance,speed">Cycling</option>
+                            <option value="Swimming" data-type="cardio" data-fields="distance,laps">Swimming</option>
+                            <option value="Rowing" data-type="cardio" data-fields="distance,strokes">Rowing</option>
+                            <option value="Elliptical" data-type="cardio" data-fields="distance,resistance">Elliptical</option>
+                            <option value="Stair Climbing" data-type="cardio" data-fields="floors,duration">Stair Climbing</option>
+                            <option value="Jump Rope" data-type="cardio" data-fields="jumps,rounds">Jump Rope</option>
+                        </optgroup>
+                        
+                        <!-- Strength Sports -->
+                        <optgroup label="💪 Strength Training">
+                            <option value="Weightlifting" data-type="strength" data-fields="sets,reps,weight">Weightlifting</option>
+                            <option value="Bodyweight Training" data-type="strength" data-fields="sets,reps">Bodyweight Training</option>
+                            <option value="Push-ups" data-type="strength" data-fields="sets,reps">Push-ups</option>
+                            <option value="Pull-ups" data-type="strength" data-fields="sets,reps">Pull-ups</option>
+                            <option value="Squats" data-type="strength" data-fields="sets,reps,weight">Squats</option>
+                            <option value="Deadlifts" data-type="strength" data-fields="sets,reps,weight">Deadlifts</option>
+                            <option value="Bench Press" data-type="strength" data-fields="sets,reps,weight">Bench Press</option>
+                            <option value="CrossFit" data-type="strength" data-fields="sets,reps,weight">CrossFit</option>
+                        </optgroup>
+                        
+                        <!-- Flexibility & Balance -->
+                        <optgroup label="🧘 Flexibility & Balance">
+                            <option value="Yoga" data-type="flexibility" data-fields="poses,difficulty">Yoga</option>
+                            <option value="Pilates" data-type="flexibility" data-fields="exercises,difficulty">Pilates</option>
+                            <option value="Stretching" data-type="flexibility" data-fields="exercises,difficulty">Stretching</option>
+                            <option value="Meditation" data-type="balance" data-fields="techniques">Meditation</option>
+                        </optgroup>
+                        
+                        <!-- HIIT & High Intensity -->
+                        <optgroup label="🔥 High Intensity">
+                            <option value="HIIT" data-type="high-intensity-interval-training" data-fields="rounds,work_time,rest_time">HIIT</option>
+                            <option value="Burpees" data-type="high-intensity-interval-training" data-fields="sets,reps">Burpees</option>
+                            <option value="Tabata" data-type="high-intensity-interval-training" data-fields="rounds,work_time,rest_time">Tabata</option>
+                        </optgroup>
+                        
+                        <!-- Sports & Games -->
+                        <optgroup label="⚽ Sports & Games">
+                            <option value="Basketball" data-type="sports" data-fields="games,points">Basketball</option>
+                            <option value="Football" data-type="sports" data-fields="games,goals">Football</option>
+                            <option value="Tennis" data-type="sports" data-fields="sets,games">Tennis</option>
+                            <option value="Boxing" data-type="sports" data-fields="rounds,punches">Boxing</option>
+                            <option value="Martial Arts" data-type="sports" data-fields="techniques,rounds">Martial Arts</option>
+                        </optgroup>
+                        
+                        <!-- Dance & Fun -->
+                        <optgroup label="💃 Dance & Fun">
+                            <option value="Dancing" data-type="other" data-fields="songs,style">Dancing</option>
+                            <option value="Zumba" data-type="other" data-fields="songs,routines">Zumba</option>
+                            <option value="Spinning" data-type="cardio" data-fields="distance,resistance">Spinning</option>
+                        </optgroup>
+                        
+                        <!-- Outdoor Activities -->
+                        <optgroup label="🏔️ Outdoor Activities">
+                            <option value="Hiking" data-type="cardio" data-fields="distance,elevation">Hiking</option>
+                            <option value="Rock Climbing" data-type="strength" data-fields="routes,difficulty">Rock Climbing</option>
+                            <option value="Surfing" data-type="sports" data-fields="waves,sessions">Surfing</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Hidden exercise type field (auto-filled) -->
+                <input type="hidden" id="exerciseType" name="exerciseType" value="">
+
+                <!-- Fast Setup Section -->
+                <div class="fast-setup-section" style="margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, rgba(0, 255, 127, 0.1), rgba(0, 255, 127, 0.05)); border: 1px solid rgba(0, 255, 127, 0.2); border-radius: var(--radius-lg);">
+                    <div class="fast-setup-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--color-neon-green); margin: 0;">⚡ Fast Setup</h3>
+                        <div class="level-toggles" style="display: flex; gap: 0.5rem;">
+                            <button type="button" id="beginnerToggle" class="level-toggle active" data-level="beginner">
+                                🌱 Beginner
+                            </button>
+                            <button type="button" id="advancedToggle" class="level-toggle" data-level="advanced">
+                                🔥 Advanced
+                            </button>
+                            <button type="button" id="viewAllToggle" class="level-toggle" data-level="all">
+                                👁️ View All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="fastSetupContent" style="display: none;">
+                        <p style="color: var(--color-text-light); margin-bottom: 1rem;">
+                            Choose a recommended workout based on your fitness level:
+                        </p>
+                        <div id="workoutRecommendations" class="workout-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                            <!-- Recommendations will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div id="fastSetupPlaceholder" style="text-align: center; padding: 2rem; color: var(--color-text-light);">
+                        <p>🎯 Select a sport above to see personalized workout recommendations!</p>
+                        <p style="font-size: 0.9rem; opacity: 0.8;">Get instant setup for beginner or advanced workouts with suggested reps, weights, and calories.</p>
+                    </div>
+                </div>
+
+                <!-- Timer Section -->
+                <div class="form-group">
+                    <label class="form-label" for="timerMinutes">Set Timer (minutes) *</label>
+                    <input type="number" class="form-control" id="timerMinutes" name="timerMinutes" 
+                           min="1" max="300" value="30" required>
+                </div>
+
+                <div class="timer-section" style="text-align: center; margin: 2rem 0; padding: 2rem; background: var(--color-card-bg); border: 1px solid rgba(0, 255, 127, 0.2); border-radius: var(--radius-lg);">
+                    <div class="timer-display" id="timerDisplay" style="font-size: 3rem; font-weight: bold; color: var(--color-neon-green); margin-bottom: 1rem; text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);">
+                        30:00
+                    </div>
+                    <div class="timer-controls">
+                        <button type="button" id="startTimerBtn" class="btn btn-success" style="margin: 0 0.5rem;">
+                            ▶️ Start Timer
+                        </button>
+                        <button type="button" id="pauseTimerBtn" class="btn btn-secondary" style="margin: 0 0.5rem; display: none;">
+                            ⏸️ Pause
+                        </button>
+                        <button type="button" id="resetTimerBtn" class="btn btn-danger" style="margin: 0 0.5rem;">
+                            🔄 Reset
+                        </button>
+                    </div>
+                    <div id="timerStatus" style="margin-top: 1rem; font-weight: bold; color: var(--color-text-light);">
+                        Set your timer and click start to begin your workout!
+                    </div>
+                </div>
+
+                <!-- 卡路里和強度 -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="caloriesBurned">Calories Burned *</label>
+                        <input type="number" class="form-control" id="caloriesBurned" name="caloriesBurned" 
+                               min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="intensity">Intensity</label>
+                        <select class="form-control" id="intensity" name="intensity">
+                            <option value="light">Light</option>
+                            <option value="moderate" selected>Moderate</option>
+                            <option value="vigorous">Vigorous</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Sport-Specific Details -->
+                <div id="cardioFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Cardio Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="distanceGroup">
+                            <label class="form-label" for="distance">Distance</label>
+                            <input type="number" class="form-control" id="distance" name="distance" min="0" step="0.1">
+                        </div>
+                        <div class="form-group" id="distanceUnitGroup">
+                            <label class="form-label" for="distanceUnit">Unit</label>
+                            <select class="form-control" id="distanceUnit" name="distanceUnit">
+                                <option value="km">Kilometers</option>
+                                <option value="miles">Miles</option>
+                                <option value="meters">Meters</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="paceGroup" style="display: none;">
+                            <label class="form-label" for="pace">Average Pace (min/km)</label>
+                            <input type="number" class="form-control" id="pace" name="pace" min="0" step="0.1">
+                        </div>
+                        <div class="form-group" id="speedGroup" style="display: none;">
+                            <label class="form-label" for="speed">Average Speed (km/h)</label>
+                            <input type="number" class="form-control" id="speed" name="speed" min="0" step="0.1">
+                        </div>
+                        <div class="form-group" id="lapsGroup" style="display: none;">
+                            <label class="form-label" for="laps">Laps Completed</label>
+                            <input type="number" class="form-control" id="laps" name="laps" min="0">
+                        </div>
+                        <div class="form-group" id="strokesGroup" style="display: none;">
+                            <label class="form-label" for="strokes">Strokes per Minute</label>
+                            <input type="number" class="form-control" id="strokes" name="strokes" min="0">
+                        </div>
+                        <div class="form-group" id="resistanceGroup" style="display: none;">
+                            <label class="form-label" for="resistance">Resistance Level</label>
+                            <input type="number" class="form-control" id="resistance" name="resistance" min="1" max="20">
+                        </div>
+                        <div class="form-group" id="floorsGroup" style="display: none;">
+                            <label class="form-label" for="floors">Floors Climbed</label>
+                            <input type="number" class="form-control" id="floors" name="floors" min="0">
+                        </div>
+                        <div class="form-group" id="elevationGroup" style="display: none;">
+                            <label class="form-label" for="elevation">Elevation Gain (m)</label>
+                            <input type="number" class="form-control" id="elevation" name="elevation" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="strengthFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Strength Training Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="setsGroup">
+                            <label class="form-label" for="sets">Sets</label>
+                            <input type="number" class="form-control" id="sets" name="sets" min="0">
+                        </div>
+                        <div class="form-group" id="repsGroup">
+                            <label class="form-label" for="reps">Reps per Set</label>
+                            <input type="number" class="form-control" id="reps" name="reps" min="0">
+                        </div>
+                        <div class="form-group" id="weightGroup">
+                            <label class="form-label" for="weight">Weight (kg)</label>
+                            <input type="number" class="form-control" id="weight" name="weight" min="0" step="0.5">
+                        </div>
+                        <div class="form-group" id="routesGroup" style="display: none;">
+                            <label class="form-label" for="routes">Routes Completed</label>
+                            <input type="number" class="form-control" id="routes" name="routes" min="0">
+                        </div>
+                        <div class="form-group" id="difficultyGroup" style="display: none;">
+                            <label class="form-label" for="difficulty">Difficulty Level</label>
+                            <select class="form-control" id="difficulty" name="difficulty">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                                <option value="expert">Expert</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="flexibilityFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Flexibility & Balance Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="posesGroup">
+                            <label class="form-label" for="poses">Poses/Exercises</label>
+                            <input type="number" class="form-control" id="poses" name="poses" min="0">
+                        </div>
+                        <div class="form-group" id="flexDifficultyGroup">
+                            <label class="form-label" for="flexDifficulty">Difficulty Level</label>
+                            <select class="form-control" id="flexDifficulty" name="flexDifficulty">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="techniquesGroup" style="display: none;">
+                            <label class="form-label" for="techniques">Techniques Practiced</label>
+                            <input type="number" class="form-control" id="techniques" name="techniques" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hiitFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">HIIT Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="roundsGroup">
+                            <label class="form-label" for="rounds">Rounds</label>
+                            <input type="number" class="form-control" id="rounds" name="rounds" min="0">
+                        </div>
+                        <div class="form-group" id="workTimeGroup">
+                            <label class="form-label" for="workTime">Work Time (sec)</label>
+                            <input type="number" class="form-control" id="workTime" name="workTime" min="0">
+                        </div>
+                        <div class="form-group" id="restTimeGroup">
+                            <label class="form-label" for="restTime">Rest Time (sec)</label>
+                            <input type="number" class="form-control" id="restTime" name="restTime" min="0">
+                        </div>
+                        <div class="form-group" id="jumpsGroup" style="display: none;">
+                            <label class="form-label" for="jumps">Total Jumps</label>
+                            <input type="number" class="form-control" id="jumps" name="jumps" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sportsFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Sports Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="gamesGroup">
+                            <label class="form-label" for="games">Games/Matches</label>
+                            <input type="number" class="form-control" id="games" name="games" min="0">
+                        </div>
+                        <div class="form-group" id="pointsGroup" style="display: none;">
+                            <label class="form-label" for="points">Points Scored</label>
+                            <input type="number" class="form-control" id="points" name="points" min="0">
+                        </div>
+                        <div class="form-group" id="goalsGroup" style="display: none;">
+                            <label class="form-label" for="goals">Goals Scored</label>
+                            <input type="number" class="form-control" id="goals" name="goals" min="0">
+                        </div>
+                        <div class="form-group" id="punchesGroup" style="display: none;">
+                            <label class="form-label" for="punches">Punches Thrown</label>
+                            <input type="number" class="form-control" id="punches" name="punches" min="0">
+                        </div>
+                        <div class="form-group" id="wavesGroup" style="display: none;">
+                            <label class="form-label" for="waves">Waves Caught</label>
+                            <input type="number" class="form-control" id="waves" name="waves" min="0">
+                        </div>
+                        <div class="form-group" id="sessionsGroup" style="display: none;">
+                            <label class="form-label" for="sessions">Sessions</label>
+                            <input type="number" class="form-control" id="sessions" name="sessions" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="otherFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Activity Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="songsGroup">
+                            <label class="form-label" for="songs">Songs/Tracks</label>
+                            <input type="number" class="form-control" id="songs" name="songs" min="0">
+                        </div>
+                        <div class="form-group" id="styleGroup" style="display: none;">
+                            <label class="form-label" for="style">Dance Style</label>
+                            <input type="text" class="form-control" id="style" name="style" placeholder="e.g., Hip-hop, Salsa">
+                        </div>
+                        <div class="form-group" id="routinesGroup" style="display: none;">
+                            <label class="form-label" for="routines">Routines Completed</label>
+                            <input type="number" class="form-control" id="routines" name="routines" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 備註 -->
+                <div class="form-group">
+                    <label class="form-label" for="notes">Notes</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3" 
+                              placeholder="How did you feel? Any achievements or challenges?..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem;">
+                    Create Workout
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/chatbot.js"></script>
+
+    <script>
+        // Timer functionality
+        let timerInterval;
+        let isTimerRunning = false;
+        let isPaused = false;
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+        let workoutStartTime = null;
+        let actualDuration = 0;
+
+        // Initialize timer display
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Update timer when input changes
+        document.getElementById('timerMinutes').addEventListener('input', function(e) {
+            if (!isTimerRunning) {
+                const minutes = parseInt(e.target.value) || 30;
+                totalSeconds = minutes * 60;
+                remainingSeconds = totalSeconds;
+                updateTimerDisplay();
+            }
+        });
+
+        // Start timer
+        document.getElementById('startTimerBtn').addEventListener('click', function() {
+            if (!isTimerRunning && !isPaused) {
+                const minutes = parseInt(document.getElementById('timerMinutes').value) || 30;
+                totalSeconds = minutes * 60;
+                remainingSeconds = totalSeconds;
+                workoutStartTime = new Date();
+            }
+
+            isTimerRunning = true;
+            isPaused = false;
+            
+            document.getElementById('startTimerBtn').style.display = 'none';
+            document.getElementById('pauseTimerBtn').style.display = 'inline-block';
+            document.getElementById('timerStatus').textContent = 'Workout in progress... Keep going! 💪';
+            document.getElementById('timerStatus').style.color = 'var(--color-success)';
+
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                updateTimerDisplay();
+
+                if (remainingSeconds <= 0) {
+                    completeTimer();
+                }
+            }, 1000);
+        });
+
+        // Pause timer
+        document.getElementById('pauseTimerBtn').addEventListener('click', function() {
+            isTimerRunning = false;
+            isPaused = true;
+            clearInterval(timerInterval);
+            
+            document.getElementById('startTimerBtn').style.display = 'inline-block';
+            document.getElementById('startTimerBtn').textContent = '▶️ Resume';
+            document.getElementById('pauseTimerBtn').style.display = 'none';
+            document.getElementById('timerStatus').textContent = 'Timer paused. Click resume to continue.';
+            document.getElementById('timerStatus').style.color = 'var(--color-accent)';
+        });
+
+        // Reset timer
+        document.getElementById('resetTimerBtn').addEventListener('click', function() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            isPaused = false;
+            workoutStartTime = null;
+            actualDuration = 0;
+            
+            const minutes = parseInt(document.getElementById('timerMinutes').value) || 30;
+            totalSeconds = minutes * 60;
+            remainingSeconds = totalSeconds;
+            updateTimerDisplay();
+            
+            document.getElementById('startTimerBtn').style.display = 'inline-block';
+            document.getElementById('startTimerBtn').textContent = '▶️ Start Timer';
+            document.getElementById('pauseTimerBtn').style.display = 'none';
+            document.getElementById('timerStatus').textContent = 'Set your timer and click start to begin your workout!';
+            document.getElementById('timerStatus').style.color = 'var(--color-text-light)';
+        });
+
+        // Complete timer
+        function completeTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            isPaused = false;
+            
+            // Calculate actual duration
+            if (workoutStartTime) {
+                actualDuration = Math.round((new Date() - workoutStartTime) / 1000 / 60);
+            }
+            
+            document.getElementById('timerDisplay').textContent = '00:00';
+            document.getElementById('startTimerBtn').style.display = 'inline-block';
+            document.getElementById('startTimerBtn').textContent = '▶️ Start Timer';
+            document.getElementById('pauseTimerBtn').style.display = 'none';
+            document.getElementById('timerStatus').textContent = '🎉 Workout Complete! Great job!';
+            document.getElementById('timerStatus').style.color = 'var(--color-success)';
+            
+            // Show completion notification
+            showNotification('🎉 Workout timer completed! Great job!', 'success');
+            
+            // Play completion sound (if supported)
+            try {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+                audio.play().catch(() => {}); // Ignore if audio fails
+            } catch (e) {}
+        }
+
+        // 常見運動建議
+        const exerciseSuggestions = [
+            'Running', 'Walking', 'Cycling', 'Swimming', 'Yoga', 'Pilates',
+            'Weightlifting', 'Bodyweight Training', 'Dancing', 'Hiking',
+            'Basketball', 'Football', 'Tennis', 'Boxing', 'Martial Arts',
+            'Rowing', 'Elliptical', 'Stair Climbing', 'Jump Rope', 'Burpees',
+            'Push-ups', 'Pull-ups', 'Squats', 'Deadlifts', 'Bench Press',
+            'Meditation', 'Stretching', 'CrossFit', 'Zumba', 'Spinning'
+        ];
+
+        // Fast Setup Workout Recommendations
+        const workoutRecommendations = {
+            'Running': {
+                beginner: [
+                    {
+                        name: 'Easy Jog',
+                        duration: 20,
+                        distance: 2,
+                        distanceUnit: 'km',
+                        pace: 7,
+                        calories: 200,
+                        intensity: 'light',
+                        description: 'Perfect for starting your running journey'
+                    },
+                    {
+                        name: 'Walk-Run Intervals',
+                        duration: 25,
+                        distance: 2.5,
+                        distanceUnit: 'km',
+                        pace: 8,
+                        calories: 220,
+                        intensity: 'moderate',
+                        description: 'Alternate between walking and jogging'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Tempo Run',
+                        duration: 45,
+                        distance: 8,
+                        distanceUnit: 'km',
+                        pace: 4.5,
+                        calories: 600,
+                        intensity: 'vigorous',
+                        description: 'Sustained effort at comfortably hard pace'
+                    },
+                    {
+                        name: 'Long Distance Run',
+                        duration: 60,
+                        distance: 12,
+                        distanceUnit: 'km',
+                        pace: 5.2,
+                        calories: 800,
+                        intensity: 'vigorous',
+                        description: 'Build endurance with steady long run'
+                    }
+                ]
+            },
+            'Squats': {
+                beginner: [
+                    {
+                        name: 'Bodyweight Squats',
+                        duration: 15,
+                        sets: 3,
+                        reps: 12,
+                        weight: 0,
+                        calories: 80,
+                        intensity: 'light',
+                        description: 'Master the basic squat movement'
+                    },
+                    {
+                        name: 'Goblet Squats',
+                        duration: 20,
+                        sets: 3,
+                        reps: 10,
+                        weight: 8,
+                        calories: 120,
+                        intensity: 'moderate',
+                        description: 'Add light weight to build strength'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Barbell Back Squats',
+                        duration: 30,
+                        sets: 4,
+                        reps: 8,
+                        weight: 60,
+                        calories: 200,
+                        intensity: 'vigorous',
+                        description: 'Previous: 135 lbs × 8 reps',
+                        previous: '135 lbs × 8'
+                    },
+                    {
+                        name: 'Heavy Squats',
+                        duration: 35,
+                        sets: 5,
+                        reps: 5,
+                        weight: 80,
+                        calories: 250,
+                        intensity: 'vigorous',
+                        description: 'Previous: 175 lbs × 5 reps',
+                        previous: '175 lbs × 5'
+                    }
+                ]
+            },
+            'Push-ups': {
+                beginner: [
+                    {
+                        name: 'Wall Push-ups',
+                        duration: 10,
+                        sets: 3,
+                        reps: 10,
+                        calories: 50,
+                        intensity: 'light',
+                        description: 'Start with wall push-ups to build strength'
+                    },
+                    {
+                        name: 'Knee Push-ups',
+                        duration: 15,
+                        sets: 3,
+                        reps: 8,
+                        calories: 70,
+                        intensity: 'moderate',
+                        description: 'Modified push-ups on knees'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Standard Push-ups',
+                        duration: 20,
+                        sets: 4,
+                        reps: 15,
+                        calories: 120,
+                        intensity: 'moderate',
+                        description: 'Previous: 4 sets × 12 reps',
+                        previous: '4 sets × 12'
+                    },
+                    {
+                        name: 'Diamond Push-ups',
+                        duration: 25,
+                        sets: 4,
+                        reps: 10,
+                        calories: 150,
+                        intensity: 'vigorous',
+                        description: 'Previous: 3 sets × 8 reps',
+                        previous: '3 sets × 8'
+                    }
+                ]
+            },
+            'Cycling': {
+                beginner: [
+                    {
+                        name: 'Leisure Ride',
+                        duration: 30,
+                        distance: 8,
+                        distanceUnit: 'km',
+                        speed: 16,
+                        calories: 250,
+                        intensity: 'light',
+                        description: 'Easy-paced cycling for beginners'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Hill Training',
+                        duration: 60,
+                        distance: 25,
+                        distanceUnit: 'km',
+                        speed: 25,
+                        calories: 600,
+                        intensity: 'vigorous',
+                        description: 'Challenging hill climbs and intervals'
+                    }
+                ]
+            },
+            'Swimming': {
+                beginner: [
+                    {
+                        name: 'Easy Swim',
+                        duration: 30,
+                        distance: 500,
+                        distanceUnit: 'meters',
+                        laps: 20,
+                        calories: 200,
+                        intensity: 'moderate',
+                        description: 'Gentle swimming for fitness'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Lap Swimming',
+                        duration: 45,
+                        distance: 1500,
+                        distanceUnit: 'meters',
+                        laps: 60,
+                        calories: 450,
+                        intensity: 'vigorous',
+                        description: 'Continuous lap swimming workout'
+                    }
+                ]
+            },
+            'Yoga': {
+                beginner: [
+                    {
+                        name: 'Gentle Yoga',
+                        duration: 30,
+                        poses: 12,
+                        flexDifficulty: 'beginner',
+                        calories: 120,
+                        intensity: 'light',
+                        description: 'Basic poses for flexibility and relaxation'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Power Yoga',
+                        duration: 60,
+                        poses: 25,
+                        flexDifficulty: 'advanced',
+                        calories: 300,
+                        intensity: 'vigorous',
+                        description: 'Dynamic flow with challenging poses'
+                    }
+                ]
+            },
+            'Weightlifting': {
+                beginner: [
+                    {
+                        name: 'Light Weights',
+                        duration: 30,
+                        sets: 3,
+                        reps: 12,
+                        weight: 15,
+                        calories: 150,
+                        intensity: 'moderate',
+                        description: 'Start with lighter weights to learn form'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Heavy Lifting',
+                        duration: 45,
+                        sets: 4,
+                        reps: 6,
+                        weight: 45,
+                        calories: 280,
+                        intensity: 'vigorous',
+                        description: 'Previous: 100 lbs × 6 reps',
+                        previous: '100 lbs × 6'
+                    }
+                ]
+            },
+            'Deadlifts': {
+                beginner: [
+                    {
+                        name: 'Romanian Deadlifts',
+                        duration: 25,
+                        sets: 3,
+                        reps: 10,
+                        weight: 20,
+                        calories: 140,
+                        intensity: 'moderate',
+                        description: 'Learn proper hip hinge movement'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Conventional Deadlifts',
+                        duration: 35,
+                        sets: 4,
+                        reps: 6,
+                        weight: 70,
+                        calories: 220,
+                        intensity: 'vigorous',
+                        description: 'Previous: 155 lbs × 6 reps',
+                        previous: '155 lbs × 6'
+                    }
+                ]
+            },
+            'Bench Press': {
+                beginner: [
+                    {
+                        name: 'Dumbbell Press',
+                        duration: 25,
+                        sets: 3,
+                        reps: 10,
+                        weight: 12,
+                        calories: 130,
+                        intensity: 'moderate',
+                        description: 'Start with dumbbells for better control'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Barbell Bench Press',
+                        duration: 35,
+                        sets: 4,
+                        reps: 8,
+                        weight: 50,
+                        calories: 200,
+                        intensity: 'vigorous',
+                        description: 'Previous: 110 lbs × 8 reps',
+                        previous: '110 lbs × 8'
+                    }
+                ]
+            },
+            'HIIT': {
+                beginner: [
+                    {
+                        name: 'Basic HIIT',
+                        duration: 20,
+                        rounds: 8,
+                        workTime: 20,
+                        restTime: 40,
+                        calories: 180,
+                        intensity: 'moderate',
+                        description: 'Short work intervals with longer rest'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Intense HIIT',
+                        duration: 30,
+                        rounds: 12,
+                        workTime: 30,
+                        restTime: 30,
+                        calories: 350,
+                        intensity: 'vigorous',
+                        description: 'High-intensity intervals for maximum burn'
+                    }
+                ]
+            },
+            'Walking': {
+                beginner: [
+                    {
+                        name: 'Casual Walk',
+                        duration: 30,
+                        distance: 2.5,
+                        distanceUnit: 'km',
+                        pace: 12,
+                        calories: 150,
+                        intensity: 'light',
+                        description: 'Gentle walk for daily activity'
+                    }
+                ],
+                advanced: [
+                    {
+                        name: 'Power Walk',
+                        duration: 45,
+                        distance: 5,
+                        distanceUnit: 'km',
+                        pace: 9,
+                        calories: 280,
+                        intensity: 'moderate',
+                        description: 'Brisk walking for cardio fitness'
+                    }
+                ]
+            }
+        };
+
+        // Current fitness level
+        let currentLevel = 'beginner';
+
+        // Level toggle functionality
+        document.querySelectorAll('.level-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                // Remove active class from all toggles
+                document.querySelectorAll('.level-toggle').forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked toggle
+                this.classList.add('active');
+                
+                // Update current level
+                currentLevel = this.getAttribute('data-level');
+                
+                // Refresh recommendations if sport is selected
+                const selectedSport = document.getElementById('exerciseName').value;
+                if (selectedSport) {
+                    const sportType = document.getElementById('exerciseType').value;
+                    showFastSetupRecommendations(selectedSport, sportType);
+                }
+            });
+        });
+
+        // Show fast setup recommendations
+        function showFastSetupRecommendations(sportName, sportType) {
+            const fastSetupContent = document.getElementById('fastSetupContent');
+            const fastSetupPlaceholder = document.getElementById('fastSetupPlaceholder');
+            const recommendationsContainer = document.getElementById('workoutRecommendations');
+            
+            // Hide placeholder and show content
+            fastSetupPlaceholder.style.display = 'none';
+            fastSetupContent.style.display = 'block';
+            
+            // Clear previous recommendations
+            recommendationsContainer.innerHTML = '';
+            
+            // Get recommendations for the selected sport
+            const sportRecommendations = workoutRecommendations[sportName];
+            
+            if (!sportRecommendations) {
+                recommendationsContainer.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--color-text-light);">
+                        <p>🚧 Fast setup recommendations for ${sportName} are coming soon!</p>
+                        <p>For now, please fill out the form manually.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Show recommendations based on current level
+            let recommendationsToShow = [];
+            
+            if (currentLevel === 'all') {
+                recommendationsToShow = [
+                    ...(sportRecommendations.beginner || []).map(r => ({...r, level: 'beginner'})),
+                    ...(sportRecommendations.advanced || []).map(r => ({...r, level: 'advanced'}))
+                ];
+            } else {
+                recommendationsToShow = (sportRecommendations[currentLevel] || []).map(r => ({...r, level: currentLevel}));
+            }
+            
+            if (recommendationsToShow.length === 0) {
+                recommendationsContainer.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--color-text-light);">
+                        <p>No recommendations available for ${currentLevel} level ${sportName}.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Create recommendation cards
+            recommendationsToShow.forEach(recommendation => {
+                const card = createRecommendationCard(recommendation, sportName, sportType);
+                recommendationsContainer.appendChild(card);
+            });
+        }
+
+        // Create recommendation card
+        function createRecommendationCard(recommendation, sportName, sportType) {
+            const card = document.createElement('div');
+            card.className = 'recommendation-card';
+            card.style.cssText = `
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(0, 255, 127, 0.3);
+                border-radius: var(--radius-md);
+                padding: 1.5rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            `;
+            
+            // Level badge
+            const levelBadge = recommendation.level === 'beginner' ? '🌱 Beginner' : '🔥 Advanced';
+            const levelColor = recommendation.level === 'beginner' ? '#4ade80' : '#f97316';
+            
+            // Previous performance display for advanced
+            const previousDisplay = recommendation.previous ? 
+                `<div style="background: rgba(255, 255, 255, 0.1); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0; font-size: 0.9rem;">
+                    <strong>Previous:</strong> ${recommendation.previous}
+                </div>` : '';
+            
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h4 style="color: var(--color-neon-green); margin: 0;">${recommendation.name}</h4>
+                    <span style="background: ${levelColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">
+                        ${levelBadge}
+                    </span>
+                </div>
+                
+                <p style="color: var(--color-text-light); margin-bottom: 1rem; font-size: 0.9rem;">
+                    ${recommendation.description}
+                </p>
+                
+                ${previousDisplay}
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem;">
+                    <div><strong>Duration:</strong> ${recommendation.duration} min</div>
+                    <div><strong>Calories:</strong> ${recommendation.calories}</div>
+                    ${recommendation.distance ? `<div><strong>Distance:</strong> ${recommendation.distance} ${recommendation.distanceUnit}</div>` : ''}
+                    ${recommendation.sets ? `<div><strong>Sets:</strong> ${recommendation.sets}</div>` : ''}
+                    ${recommendation.reps ? `<div><strong>Reps:</strong> ${recommendation.reps}</div>` : ''}
+                    ${recommendation.weight ? `<div><strong>Weight:</strong> ${recommendation.weight} kg</div>` : ''}
+                    ${recommendation.pace ? `<div><strong>Pace:</strong> ${recommendation.pace} min/km</div>` : ''}
+                    ${recommendation.speed ? `<div><strong>Speed:</strong> ${recommendation.speed} km/h</div>` : ''}
+                    ${recommendation.rounds ? `<div><strong>Rounds:</strong> ${recommendation.rounds}</div>` : ''}
+                    ${recommendation.workTime ? `<div><strong>Work:</strong> ${recommendation.workTime}s</div>` : ''}
+                    ${recommendation.restTime ? `<div><strong>Rest:</strong> ${recommendation.restTime}s</div>` : ''}
+                    ${recommendation.poses ? `<div><strong>Poses:</strong> ${recommendation.poses}</div>` : ''}
+                </div>
+                
+                <button type="button" class="use-recommendation-btn" style="
+                    width: 100%;
+                    padding: 0.75rem;
+                    background: linear-gradient(135deg, var(--color-neon-green), #00cc88);
+                    color: black;
+                    border: none;
+                    border-radius: var(--radius-md);
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                ">
+                    ⚡ Use This Setup
+                </button>
+            `;
+            
+            // Add hover effects
+            card.addEventListener('mouseenter', () => {
+                card.style.borderColor = 'var(--color-neon-green)';
+                card.style.transform = 'translateY(-2px)';
+                card.style.boxShadow = '0 8px 25px rgba(0, 255, 127, 0.2)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = 'rgba(0, 255, 127, 0.3)';
+                card.style.transform = 'translateY(0)';
+                card.style.boxShadow = 'none';
+            });
+            
+            // Add click handler to use recommendation
+            const useBtn = card.querySelector('.use-recommendation-btn');
+            useBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyRecommendation(recommendation, sportName);
+            });
+            
+            return card;
+        }
+
+        // Apply recommendation to form
+        function applyRecommendation(recommendation, sportName) {
+            // Set basic fields
+            document.getElementById('timerMinutes').value = recommendation.duration;
+            document.getElementById('caloriesBurned').value = recommendation.calories;
+            document.getElementById('intensity').value = recommendation.intensity;
+            
+            // Update timer display
+            totalSeconds = recommendation.duration * 60;
+            remainingSeconds = totalSeconds;
+            updateTimerDisplay();
+            
+            // Set sport-specific fields
+            if (recommendation.distance) {
+                const distanceField = document.getElementById('distance');
+                const distanceUnitField = document.getElementById('distanceUnit');
+                if (distanceField) distanceField.value = recommendation.distance;
+                if (distanceUnitField) distanceUnitField.value = recommendation.distanceUnit;
+            }
+            
+            if (recommendation.sets) {
+                const setsField = document.getElementById('sets');
+                if (setsField) setsField.value = recommendation.sets;
+            }
+            
+            if (recommendation.reps) {
+                const repsField = document.getElementById('reps');
+                if (repsField) repsField.value = recommendation.reps;
+            }
+            
+            if (recommendation.weight) {
+                const weightField = document.getElementById('weight');
+                if (weightField) weightField.value = recommendation.weight;
+            }
+            
+            if (recommendation.pace) {
+                const paceField = document.getElementById('pace');
+                if (paceField) paceField.value = recommendation.pace;
+            }
+            
+            if (recommendation.speed) {
+                const speedField = document.getElementById('speed');
+                if (speedField) speedField.value = recommendation.speed;
+            }
+            
+            if (recommendation.laps) {
+                const lapsField = document.getElementById('laps');
+                if (lapsField) lapsField.value = recommendation.laps;
+            }
+            
+            if (recommendation.poses) {
+                const posesField = document.getElementById('poses');
+                if (posesField) posesField.value = recommendation.poses;
+            }
+            
+            if (recommendation.flexDifficulty) {
+                const flexDifficultyField = document.getElementById('flexDifficulty');
+                if (flexDifficultyField) flexDifficultyField.value = recommendation.flexDifficulty;
+            }
+            
+            if (recommendation.rounds) {
+                const roundsField = document.getElementById('rounds');
+                if (roundsField) roundsField.value = recommendation.rounds;
+            }
+            
+            if (recommendation.workTime) {
+                const workTimeField = document.getElementById('workTime');
+                if (workTimeField) workTimeField.value = recommendation.workTime;
+            }
+            
+            if (recommendation.restTime) {
+                const restTimeField = document.getElementById('restTime');
+                if (restTimeField) restTimeField.value = recommendation.restTime;
+            }
+            
+            // Show success notification
+            showNotification(`✅ Applied ${recommendation.name} setup! You can modify the values if needed.`, 'success');
+            
+            // Scroll to timer section
+            document.querySelector('.timer-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Smart sport selection and field management
+        document.getElementById('exerciseName').addEventListener('change', function(e) {
+            const selectedOption = e.target.selectedOptions[0];
+            if (!selectedOption || !selectedOption.value) {
+                hideAllFields();
+                document.getElementById('fastSetupContent').style.display = 'none';
+                document.getElementById('fastSetupPlaceholder').style.display = 'block';
+                return;
+            }
+
+            const sportType = selectedOption.getAttribute('data-type');
+            const sportFields = selectedOption.getAttribute('data-fields');
+            const sportName = selectedOption.value;
+            
+            // Set the hidden exercise type
+            document.getElementById('exerciseType').value = sportType;
+            
+            // Hide all field groups first
+            hideAllFields();
+            
+            // Show appropriate fields based on sport type and specific fields
+            showFieldsForSport(sportType, sportFields);
+            
+            // Show fast setup recommendations
+            showFastSetupRecommendations(sportName, sportType);
+        });
+
+        function hideAllFields() {
+            // Hide all main field groups
+            document.getElementById('cardioFields').style.display = 'none';
+            document.getElementById('strengthFields').style.display = 'none';
+            document.getElementById('flexibilityFields').style.display = 'none';
+            document.getElementById('hiitFields').style.display = 'none';
+            document.getElementById('sportsFields').style.display = 'none';
+            document.getElementById('otherFields').style.display = 'none';
+            
+            // Hide all individual field groups
+            const allFieldGroups = [
+                'distanceGroup', 'distanceUnitGroup', 'paceGroup', 'speedGroup', 'lapsGroup', 
+                'strokesGroup', 'resistanceGroup', 'floorsGroup', 'elevationGroup',
+                'setsGroup', 'repsGroup', 'weightGroup', 'routesGroup', 'difficultyGroup',
+                'posesGroup', 'flexDifficultyGroup', 'techniquesGroup',
+                'roundsGroup', 'workTimeGroup', 'restTimeGroup', 'jumpsGroup',
+                'gamesGroup', 'pointsGroup', 'goalsGroup', 'punchesGroup', 'wavesGroup', 'sessionsGroup',
+                'songsGroup', 'styleGroup', 'routinesGroup'
+            ];
+            
+            allFieldGroups.forEach(groupId => {
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'none';
+            });
+        }
+
+        function showFieldsForSport(sportType, sportFields) {
+            const fieldsArray = sportFields ? sportFields.split(',') : [];
+            
+            switch(sportType) {
+                case 'cardio':
+                    document.getElementById('cardioFields').style.display = 'block';
+                    showCardioFields(fieldsArray);
+                    break;
+                    
+                case 'strength':
+                    document.getElementById('strengthFields').style.display = 'block';
+                    showStrengthFields(fieldsArray);
+                    break;
+                    
+                case 'flexibility':
+                case 'balance':
+                    document.getElementById('flexibilityFields').style.display = 'block';
+                    showFlexibilityFields(fieldsArray);
+                    break;
+                    
+                case 'high-intensity-interval-training':
+                    document.getElementById('hiitFields').style.display = 'block';
+                    showHIITFields(fieldsArray);
+                    break;
+                    
+                case 'sports':
+                    document.getElementById('sportsFields').style.display = 'block';
+                    showSportsFields(fieldsArray);
+                    break;
+                    
+                case 'other':
+                    document.getElementById('otherFields').style.display = 'block';
+                    showOtherFields(fieldsArray);
+                    break;
+            }
+        }
+
+        function showCardioFields(fields) {
+            // Always show distance and unit for cardio
+            document.getElementById('distanceGroup').style.display = 'block';
+            document.getElementById('distanceUnitGroup').style.display = 'block';
+            
+            fields.forEach(field => {
+                const groupId = field + 'Group';
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'block';
+            });
+        }
+
+        function showStrengthFields(fields) {
+            fields.forEach(field => {
+                const groupId = field + 'Group';
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'block';
+            });
+        }
+
+        function showFlexibilityFields(fields) {
+            fields.forEach(field => {
+                if (field === 'poses' || field === 'exercises') {
+                    document.getElementById('posesGroup').style.display = 'block';
+                } else if (field === 'difficulty') {
+                    document.getElementById('flexDifficultyGroup').style.display = 'block';
+                } else {
+                    const groupId = field + 'Group';
+                    const group = document.getElementById(groupId);
+                    if (group) group.style.display = 'block';
+                }
+            });
+        }
+
+        function showHIITFields(fields) {
+            fields.forEach(field => {
+                const groupId = field.replace('_', '') + 'Group';
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'block';
+            });
+        }
+
+        function showSportsFields(fields) {
+            // Always show games for sports
+            document.getElementById('gamesGroup').style.display = 'block';
+            
+            fields.forEach(field => {
+                if (field !== 'games') {
+                    const groupId = field + 'Group';
+                    const group = document.getElementById(groupId);
+                    if (group) group.style.display = 'block';
+                }
+            });
+        }
+
+        function showOtherFields(fields) {
+            fields.forEach(field => {
+                const groupId = field + 'Group';
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'block';
+            });
+        }
+
+        // 表單提交
+        document.getElementById('workoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Add timer-related data
+            data.date = new Date().toISOString().split('T')[0]; // Current date
+            data.duration = actualDuration || parseInt(data.timerMinutes); // Use actual duration if timer was used
+            data.startTime = workoutStartTime ? workoutStartTime.toTimeString().slice(0, 5) : new Date().toTimeString().slice(0, 5);
+            
+            // Calculate end time
+            const endTime = new Date();
+            if (workoutStartTime && actualDuration) {
+                endTime.setTime(workoutStartTime.getTime() + (actualDuration * 60 * 1000));
+            } else {
+                endTime.setTime(endTime.getTime() + (parseInt(data.timerMinutes) * 60 * 1000));
+            }
+            data.endTime = endTime.toTimeString().slice(0, 5);
+
+            // 基本驗證
+            if (!data.exerciseName || !data.timerMinutes || !data.caloriesBurned) {
+                showNotification('❌ Please fill in all required fields', 'error');
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/workouts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('✅ Workout created successfully! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/read';
+                    }, 1500);
+                } else {
+                    showNotification(`❌ Error: ${result.error || 'Failed to create workout'}`, 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Initialize timer display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const minutes = parseInt(document.getElementById('timerMinutes').value) || 30;
+            totalSeconds = minutes * 60;
+            remainingSeconds = totalSeconds;
+            updateTimerDisplay();
+        });
+
+        // Notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification animate-slide-up';
+            
+            const colors = {
+                success: 'var(--color-success)',
+                error: 'var(--color-error)',
+                info: 'var(--color-primary)',
+                warning: 'var(--color-accent)'
+            };
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: var(--space-lg);
+                right: var(--space-lg);
+                padding: var(--space-md) var(--space-lg);
+                border-radius: var(--radius-lg);
+                color: white;
+                font-weight: var(--font-weight-medium);
+                font-family: var(--font-primary);
+                z-index: 1000;
+                backdrop-filter: blur(20px);
+                border: 1px solid ${colors[type] || colors.info};
+                box-shadow: var(--shadow-lg), 0 8px 25px ${colors[type] || colors.info}33;
+                background: linear-gradient(135deg, ${colors[type] || colors.info}, ${colors[type] || colors.info}dd);
+                max-width: 400px;
+                word-wrap: break-word;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut var(--duration-moderate) var(--ease-acceleration)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 350);
+            }, 4000);
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>
+                    <span class="footer-icon">📧</span>
+                    <a href="mailto:alanluk2226@gmail.com">alanluk2226@gmail.com</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Alan Workout</h4>
+                <p>Your fitness journey starts here</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Your Progress</h4>
+                <p>Track workouts, join courses, achieve goals</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Alan Workout. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/navigation.js"></script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Fitness App</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 導航欄 -->
+        <nav class="navbar">
+            <div class="nav-brand">🏋️ Fitness Tracker</div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/courses" class="nav-link">Courses</a> <!-- 新增課程鏈接 -->
+                <a href="/my-courses" class="nav-link">My Courses</a> <!-- 新增我的課程鏈接 -->
+                <a href="/create" class="nav-link">Create Workout</a>
+                <a href="/read" class="nav-link">My Workouts</a>
+                <% if (user) { %>
+                    <div class="user-info">
+                        <span>Welcome, <%= user.username %>!</span>
+                        <a href="/logout" class="btn btn-danger">Logout</a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="nav-link">Login</a>
+                    <a href="/register" class="nav-link">Register</a>
+                <% } %>
+            </div>
+        </nav>
+
+        <!-- 主內容 -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h1 class="card-title">Welcome to Your Fitness Journey! 🏃‍♂️</h1>
+                <p>Track your workouts, achieve your goals, and transform your life.</p>
+            </div>
+
+            <% if (user) { %>
+                <!-- 用戶已登入的內容 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalWorkouts">0</div>
+                        <div class="stat-label">Total Workouts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCalories">0</div>
+                        <div class="stat-label">Calories Burned</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalDuration">0</div>
+                        <div class="stat-label">Minutes Trained</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCourses">0</div>
+                        <div class="stat-label">Courses Enrolled</div>
+                    </div>
+                </div>
+
+                <!-- Advanced Analytics Section -->
+                <div class="analytics-section" style="margin: 3rem 0;">
+                    <div class="analytics-header">
+                        <h2 style="color: var(--color-neon-green); margin-bottom: 0.5rem;">📊 Your Fitness Analytics</h2>
+                        <div class="period-selector">
+                            <button id="currentPeriodBtn" class="period-btn active">This Month</button>
+                            <button id="previousPeriodBtn" class="period-btn">Last Month</button>
+                            <button id="weeklyViewBtn" class="period-btn">Weekly View</button>
+                        </div>
+                    </div>
+
+                    <!-- Period Summary Cards -->
+                    <div class="period-summary" id="periodSummary">
+                        <div class="summary-card">
+                            <div class="summary-header">
+                                <h3 id="currentPeriodTitle">Current Month</h3>
+                                <span class="period-dates" id="currentPeriodDates"></span>
+                            </div>
+                            <div class="summary-stats" id="currentPeriodStats">
+                                <!-- Stats will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-arrow">
+                            <span>📈</span>
+                        </div>
+                        
+                        <div class="summary-card">
+                            <div class="summary-header">
+                                <h3 id="previousPeriodTitle">Previous Month</h3>
+                                <span class="period-dates" id="previousPeriodDates"></span>
+                            </div>
+                            <div class="summary-stats" id="previousPeriodStats">
+                                <!-- Stats will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Analytics -->
+                    <div class="detailed-analytics">
+                        <!-- Favorite Sports Analysis -->
+                        <div class="analytics-card">
+                            <h3>🏆 Favorite Sports</h3>
+                            <div id="favoriteSports" class="sports-analysis">
+                                <!-- Sports data will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Weekly Progress Chart -->
+                        <div class="analytics-card">
+                            <h3>📅 Weekly Progress</h3>
+                            <div id="weeklyProgress" class="weekly-chart">
+                                <!-- Weekly data will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Performance Metrics -->
+                        <div class="analytics-card">
+                            <h3>⚡ Performance Metrics</h3>
+                            <div id="performanceMetrics" class="metrics-grid">
+                                <!-- Performance data will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <h3>Quick Actions</h3>
+                        <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                            <a href="/create" class="btn btn-primary">➕ Create New Workout</a>
+                            <a href="/read" class="btn btn-success">📊 View My Workouts</a>
+                            <a href="/courses" class="btn btn-primary" style="background: #e74c3c;">🎯 Browse Courses</a>
+                            <a href="/my-courses" class="btn btn-success" style="background: #f39c12;">📚 My Courses</a>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h3>Recent Activity</h3>
+                        <div id="recentWorkouts">
+                            <p>Loading your recent workouts...</p>
+                        </div>
+                        
+                        <h3 style="margin-top: 2rem;">My Enrolled Courses</h3>
+                        <div id="myCourses">
+                            <p>Loading your courses...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 推薦課程部分 -->
+                <div style="margin-top: 3rem;">
+                    <h3>🔥 Popular Courses This Week</h3>
+                    <div id="featuredCourses" class="courses-preview">
+                        <p>Loading featured courses...</p>
+                    </div>
+                </div>
+
+            <% } else { %>
+                <!-- 用戶未登入的內容 -->
+                <div style="text-align: center; padding: 3rem 1rem;">
+                    <h2 style="margin-bottom: 1rem;">Start Your Fitness Journey Today!</h2>
+                    <p style="margin-bottom: 2rem; font-size: 1.1rem;">
+                        Join thousands of users tracking their workouts and achieving their fitness goals.
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="/register" class="btn btn-primary" style="padding: 1rem 2rem;">
+                            Get Started - It's Free!
+                        </a>
+                        <a href="/login" class="btn btn-success" style="padding: 1rem 2rem;">
+                            I Already Have an Account
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top: 3rem;">
+                    <div class="col">
+                        <h4>🎯 Track Progress</h4>
+                        <p>Monitor your workouts, calories burned, and fitness improvements over time.</p>
+                    </div>
+                    <div class="col">
+                        <h4>🏋️ Join Classes</h4>
+                        <p>Enroll in expert-led fitness courses like Yoga, HIIT, Zumba, and more!</p>
+                    </div>
+                    <div class="col">
+                        <h4>🏆 Achieve Goals</h4>
+                        <p>Set personal goals and track your journey to success with our coaches.</p>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <style>
+        .courses-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .course-preview-card {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 255, 127, 0.1);
+            border-left: 4px solid #00ff7f;
+            border: 1px solid rgba(0, 255, 127, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .course-preview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 127, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .course-preview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 255, 127, 0.2);
+            border-color: rgba(0, 255, 127, 0.4);
+        }
+        
+        .course-preview-card:hover::before {
+            left: 100%;
+        }
+        
+        .course-preview-card h4 {
+            color: #00ff7f !important;
+            text-shadow: 0 0 5px rgba(0, 255, 127, 0.3);
+        }
+        
+        .course-preview-card p {
+            color: #e0e0e0 !important;
+        }
+        
+        .course-type {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 0.5rem;
+            text-shadow: none;
+        }
+        
+        .yoga { background: linear-gradient(135deg, #ff69b4, #ff1493); }
+        .bodyweight { background: linear-gradient(135deg, #00ffff, #0080ff); }
+        .hii { background: linear-gradient(135deg, #5ecf97, #2ed573); }
+        .circuittraining { background: linear-gradient(135deg, #a4c220, #7cb342); }
+        .pilates { background: linear-gradient(135deg, #a470f7, #8e44ad); }
+        .cardiokickboxing { background: linear-gradient(135deg, #e65b95, #e91e63); }
+        .zumba { background: linear-gradient(135deg, #a57e2a, #d4af37); }
+        
+        .enroll-btn-small {
+            background: linear-gradient(135deg, #00ff7f, #00cc66);
+            color: #000;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .enroll-btn-small:hover {
+            background: linear-gradient(135deg, #00cc66, #00ff7f);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 127, 0.3);
+        }
+    </style>
+
+    <script>
+        // 載入用戶統計數據
+        async function loadUserStats() {
+            try {
+                // 載入訓練數據
+                const workoutsResponse = await fetch('/api/workouts');
+                const workoutsData = await workoutsResponse.json();
+                
+                // 載入課程數據
+                const coursesResponse = await fetch('/api/my-courses');
+                const coursesData = await coursesResponse.json();
+                
+                // 載入推薦課程
+                const featuredResponse = await fetch('/api/courses?limit=3');
+                const featuredData = await featuredResponse.json();
+                
+                if (workoutsData.success) {
+                    const workouts = workoutsData.workouts;
+                    const totalWorkouts = workouts.length;
+                    const totalCalories = workouts.reduce((sum, workout) => sum + workout.caloriesBurned, 0);
+                    const totalDuration = workouts.reduce((sum, workout) => sum + workout.duration, 0);
+                    
+                    document.getElementById('totalWorkouts').textContent = totalWorkouts;
+                    document.getElementById('totalCalories').textContent = totalCalories;
+                    document.getElementById('totalDuration').textContent = totalDuration;
+                    
+                    // Load advanced analytics
+                    loadAdvancedAnalytics(workouts);
+                    
+                    // 顯示最近的訓練
+                    const recentWorkouts = workouts.slice(0, 3);
+                    const recentContainer = document.getElementById('recentWorkouts');
+                    
+                    if (recentWorkouts.length > 0) {
+                        recentContainer.innerHTML = recentWorkouts.map(workout => `
+                            <div class="workout-card">
+                                <div class="workout-header">
+                                    <div class="workout-title">${workout.exerciseName}</div>
+                                    <span style="color: #666;">${new Date(workout.date).toLocaleDateString()}</span>
+                                </div>
+                                <div class="workout-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Duration</span>
+                                        <span>${workout.duration} mins</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Calories</span>
+                                        <span>${workout.caloriesBurned}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        recentContainer.innerHTML = '<p>No workouts yet. <a href="/create">Create your first workout!</a></p>';
+                    }
+                }
+                
+                // 顯示用戶課程
+                if (coursesData.success) {
+                    const enrollments = coursesData.enrollments;
+                    const totalCourses = enrollments.length;
+                    
+                    document.getElementById('totalCourses').textContent = totalCourses;
+                    
+                    const coursesContainer = document.getElementById('myCourses');
+                    
+                    if (enrollments.length > 0) {
+                        coursesContainer.innerHTML = enrollments.map(enrollment => {
+                            const course = enrollment.course;
+                            return `
+                                <div class="workout-card">
+                                    <div class="workout-header">
+                                        <div class="workout-title">${course.name}</div>
+                                        <span style="color: #666;">${course.schedule.day}</span>
+                                    </div>
+                                    <div class="workout-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Time</span>
+                                            <span>${course.schedule.startTime} - ${course.schedule.endTime}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Coach</span>
+                                            <span>${course.coach.name}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        coursesContainer.innerHTML = '<p>No courses enrolled. <a href="/courses">Browse courses now!</a></p>';
+                    }
+                }
+                
+                // 顯示推薦課程
+                if (featuredData.success) {
+                    const featuredCourses = featuredData.courses.slice(0, 3);
+                    const featuredContainer = document.getElementById('featuredCourses');
+                    
+                    if (featuredCourses.length > 0) {
+                        featuredContainer.innerHTML = featuredCourses.map(course => `
+                            <div class="course-preview-card">
+                                <span class="course-type ${course.type}">${course.type.toUpperCase()}</span>
+                                <h4 style="margin: 0.5rem 0;">${course.name}</h4>
+                                <p style="margin: 0.5rem 0; font-size: 0.9rem; color: #666;">
+                                    ${course.schedule.day} • ${course.schedule.startTime} - ${course.schedule.endTime}
+                                </p>
+                                <p style="margin: 0.5rem 0; font-size: 0.8rem;">
+                                    Coach: ${course.coach.name}
+                                </p>
+                                <button class="enroll-btn-small" onclick="enrollCourse('${course._id}')">
+                                    Enroll Now
+                                </button>
+                            </div>
+                        `).join('');
+                    } else {
+                        featuredContainer.innerHTML = '<p>No courses available at the moment.</p>';
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Advanced Analytics Functions
+        let currentAnalyticsView = 'current';
+        let allWorkoutsData = [];
+
+        function loadAdvancedAnalytics(workouts) {
+            allWorkoutsData = workouts;
+            updateAnalyticsView();
+        }
+
+        function updateAnalyticsView() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            // Get current month data
+            const currentMonthStart = new Date(currentYear, currentMonth, 1);
+            const currentMonthEnd = new Date(currentYear, currentMonth + 1, 0);
+            
+            // Get previous month data
+            const previousMonthStart = new Date(currentYear, currentMonth - 1, 1);
+            const previousMonthEnd = new Date(currentYear, currentMonth, 0);
+            
+            const currentMonthData = filterWorkoutsByDateRange(allWorkoutsData, currentMonthStart, currentMonthEnd);
+            const previousMonthData = filterWorkoutsByDateRange(allWorkoutsData, previousMonthStart, previousMonthEnd);
+            
+            // Update period titles and dates
+            document.getElementById('currentPeriodTitle').textContent = 'Current Month';
+            document.getElementById('previousPeriodTitle').textContent = 'Previous Month';
+            document.getElementById('currentPeriodDates').textContent = formatDateRange(currentMonthStart, currentMonthEnd);
+            document.getElementById('previousPeriodDates').textContent = formatDateRange(previousMonthStart, previousMonthEnd);
+            
+            // Update summary stats
+            updatePeriodSummary(currentMonthData, previousMonthData);
+            
+            // Update detailed analytics
+            updateFavoriteSports(currentMonthData);
+            updateWeeklyProgress(currentMonthData);
+            updatePerformanceMetrics(currentMonthData, previousMonthData);
+        }
+
+        function filterWorkoutsByDateRange(workouts, startDate, endDate) {
+            return workouts.filter(workout => {
+                const workoutDate = new Date(workout.date);
+                return workoutDate >= startDate && workoutDate <= endDate;
+            });
+        }
+
+        function formatDateRange(startDate, endDate) {
+            const options = { month: 'short', day: 'numeric' };
+            return `${startDate.toLocaleDateString('en-US', options)} - ${endDate.toLocaleDateString('en-US', options)}`;
+        }
+
+        function updatePeriodSummary(currentData, previousData) {
+            const currentStats = calculatePeriodStats(currentData);
+            const previousStats = calculatePeriodStats(previousData);
+            
+            // Update current period stats
+            document.getElementById('currentPeriodStats').innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-value">${currentStats.workouts}</span>
+                    <div class="stat-label">Workouts</div>
+                    <div class="stat-change ${getChangeClass(currentStats.workouts, previousStats.workouts)}">
+                        ${getChangeText(currentStats.workouts, previousStats.workouts)}
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${currentStats.calories}</span>
+                    <div class="stat-label">Calories</div>
+                    <div class="stat-change ${getChangeClass(currentStats.calories, previousStats.calories)}">
+                        ${getChangeText(currentStats.calories, previousStats.calories)}
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${currentStats.duration}</span>
+                    <div class="stat-label">Minutes</div>
+                    <div class="stat-change ${getChangeClass(currentStats.duration, previousStats.duration)}">
+                        ${getChangeText(currentStats.duration, previousStats.duration)}
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${currentStats.distance.toFixed(1)}</span>
+                    <div class="stat-label">Distance (km)</div>
+                    <div class="stat-change ${getChangeClass(currentStats.distance, previousStats.distance)}">
+                        ${getChangeText(currentStats.distance, previousStats.distance, true)}
+                    </div>
+                </div>
+            `;
+            
+            // Update previous period stats
+            document.getElementById('previousPeriodStats').innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-value">${previousStats.workouts}</span>
+                    <div class="stat-label">Workouts</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${previousStats.calories}</span>
+                    <div class="stat-label">Calories</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${previousStats.duration}</span>
+                    <div class="stat-label">Minutes</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${previousStats.distance.toFixed(1)}</span>
+                    <div class="stat-label">Distance (km)</div>
+                </div>
+            `;
+        }
+
+        function calculatePeriodStats(workouts) {
+            return {
+                workouts: workouts.length,
+                calories: workouts.reduce((sum, w) => sum + (w.caloriesBurned || 0), 0),
+                duration: workouts.reduce((sum, w) => sum + (w.duration || 0), 0),
+                distance: workouts.reduce((sum, w) => {
+                    if (w.distance && w.distanceUnit) {
+                        // Convert to km
+                        let distance = w.distance;
+                        if (w.distanceUnit === 'miles') distance *= 1.60934;
+                        if (w.distanceUnit === 'meters') distance /= 1000;
+                        return sum + distance;
+                    }
+                    return sum;
+                }, 0),
+                weight: workouts.reduce((sum, w) => sum + (w.weight || 0), 0)
+            };
+        }
+
+        function getChangeClass(current, previous) {
+            if (current > previous) return 'positive';
+            if (current < previous) return 'negative';
+            return 'neutral';
+        }
+
+        function getChangeText(current, previous, isDecimal = false) {
+            const diff = current - previous;
+            if (diff === 0) return 'No change';
+            
+            const percentage = previous > 0 ? Math.abs((diff / previous) * 100) : 100;
+            const sign = diff > 0 ? '+' : '-';
+            const value = isDecimal ? Math.abs(diff).toFixed(1) : Math.abs(diff);
+            
+            return `${sign}${value} (${percentage.toFixed(0)}%)`;
+        }
+
+        function updateFavoriteSports(workouts) {
+            const sportsData = {};
+            
+            workouts.forEach(workout => {
+                const sport = workout.exerciseName;
+                if (!sportsData[sport]) {
+                    sportsData[sport] = {
+                        count: 0,
+                        duration: 0,
+                        calories: 0,
+                        distance: 0,
+                        weight: 0
+                    };
+                }
+                
+                sportsData[sport].count++;
+                sportsData[sport].duration += workout.duration || 0;
+                sportsData[sport].calories += workout.caloriesBurned || 0;
+                
+                if (workout.distance && workout.distanceUnit) {
+                    let distance = workout.distance;
+                    if (workout.distanceUnit === 'miles') distance *= 1.60934;
+                    if (workout.distanceUnit === 'meters') distance /= 1000;
+                    sportsData[sport].distance += distance;
+                }
+                
+                sportsData[sport].weight += workout.weight || 0;
+            });
+            
+            // Sort by workout count
+            const sortedSports = Object.entries(sportsData)
+                .sort(([,a], [,b]) => b.count - a.count)
+                .slice(0, 5);
+            
+            document.getElementById('favoriteSports').innerHTML = sortedSports.map(([sport, data]) => `
+                <div class="sport-item">
+                    <div class="sport-name">${sport}</div>
+                    <div class="sport-stats">
+                        <span>${data.count} workouts</span>
+                        <span>${data.duration} min</span>
+                        <span>${data.calories} cal</span>
+                        ${data.distance > 0 ? `<span>${data.distance.toFixed(1)} km</span>` : ''}
+                        ${data.weight > 0 ? `<span>${data.weight} kg</span>` : ''}
+                    </div>
+                </div>
+            `).join('') || '<p>No workout data available for this period.</p>';
+        }
+
+        function updateWeeklyProgress(workouts) {
+            const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const weeklyData = new Array(7).fill(0);
+            
+            workouts.forEach(workout => {
+                const workoutDate = new Date(workout.date);
+                const dayOfWeek = workoutDate.getDay();
+                weeklyData[dayOfWeek] += workout.caloriesBurned || 0;
+            });
+            
+            const maxCalories = Math.max(...weeklyData, 1);
+            
+            document.getElementById('weeklyProgress').innerHTML = weekDays.map((day, index) => `
+                <div class="day-column">
+                    <div class="day-label">${day}</div>
+                    <div class="day-bar" style="height: ${Math.max(20, (weeklyData[index] / maxCalories) * 100)}px;">
+                        <span class="day-value">${weeklyData[index]}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updatePerformanceMetrics(currentData, previousData) {
+            const currentStats = calculatePeriodStats(currentData);
+            const previousStats = calculatePeriodStats(previousData);
+            
+            const avgCaloriesPerWorkout = currentStats.workouts > 0 ? 
+                Math.round(currentStats.calories / currentStats.workouts) : 0;
+            const avgDurationPerWorkout = currentStats.workouts > 0 ? 
+                Math.round(currentStats.duration / currentStats.workouts) : 0;
+            
+            const prevAvgCalories = previousStats.workouts > 0 ? 
+                Math.round(previousStats.calories / previousStats.workouts) : 0;
+            const prevAvgDuration = previousStats.workouts > 0 ? 
+                Math.round(previousStats.duration / previousStats.workouts) : 0;
+            
+            document.getElementById('performanceMetrics').innerHTML = `
+                <div class="metric-item">
+                    <span class="metric-value">${avgCaloriesPerWorkout}</span>
+                    <div class="metric-label">Avg Calories/Workout</div>
+                    <div class="metric-comparison ${getChangeClass(avgCaloriesPerWorkout, prevAvgCalories)}">
+                        ${getChangeText(avgCaloriesPerWorkout, prevAvgCalories)}
+                    </div>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">${avgDurationPerWorkout}</span>
+                    <div class="metric-label">Avg Duration/Workout</div>
+                    <div class="metric-comparison ${getChangeClass(avgDurationPerWorkout, prevAvgDuration)}">
+                        ${getChangeText(avgDurationPerWorkout, prevAvgDuration)}
+                    </div>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">${currentStats.distance.toFixed(1)}</span>
+                    <div class="metric-label">Total Distance (km)</div>
+                    <div class="metric-comparison ${getChangeClass(currentStats.distance, previousStats.distance)}">
+                        ${getChangeText(currentStats.distance, previousStats.distance, true)}
+                    </div>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">${currentStats.weight}</span>
+                    <div class="metric-label">Total Weight (kg)</div>
+                    <div class="metric-comparison ${getChangeClass(currentStats.weight, previousStats.weight)}">
+                        ${getChangeText(currentStats.weight, previousStats.weight)}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Period selector event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('currentPeriodBtn').addEventListener('click', function() {
+                setActivePeriod('current');
+                updateAnalyticsView();
+            });
+            
+            document.getElementById('previousPeriodBtn').addEventListener('click', function() {
+                setActivePeriod('previous');
+                showPreviousPeriodView();
+            });
+            
+            document.getElementById('weeklyViewBtn').addEventListener('click', function() {
+                setActivePeriod('weekly');
+                showWeeklyView();
+            });
+        });
+
+        function setActivePeriod(period) {
+            document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(period === 'current' ? 'currentPeriodBtn' : 
+                                   period === 'previous' ? 'previousPeriodBtn' : 'weeklyViewBtn').classList.add('active');
+            currentAnalyticsView = period;
+        }
+
+        function showPreviousPeriodView() {
+            const now = new Date();
+            const previousMonth = now.getMonth() - 1;
+            const previousYear = previousMonth < 0 ? now.getFullYear() - 1 : now.getFullYear();
+            const adjustedMonth = previousMonth < 0 ? 11 : previousMonth;
+            
+            const previousMonthStart = new Date(previousYear, adjustedMonth, 1);
+            const previousMonthEnd = new Date(previousYear, adjustedMonth + 1, 0);
+            
+            const previousMonthData = filterWorkoutsByDateRange(allWorkoutsData, previousMonthStart, previousMonthEnd);
+            
+            // Update view to show only previous month data
+            document.getElementById('currentPeriodTitle').textContent = 'Previous Month';
+            document.getElementById('currentPeriodDates').textContent = formatDateRange(previousMonthStart, previousMonthEnd);
+            
+            // Hide comparison
+            document.querySelector('.comparison-arrow').style.display = 'none';
+            document.querySelector('.summary-card:last-child').style.display = 'none';
+            
+            updateFavoriteSports(previousMonthData);
+            updateWeeklyProgress(previousMonthData);
+        }
+
+        function showWeeklyView() {
+            const now = new Date();
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - now.getDay());
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            
+            const weekData = filterWorkoutsByDateRange(allWorkoutsData, weekStart, weekEnd);
+            
+            document.getElementById('currentPeriodTitle').textContent = 'This Week';
+            document.getElementById('currentPeriodDates').textContent = formatDateRange(weekStart, weekEnd);
+            
+            // Hide comparison
+            document.querySelector('.comparison-arrow').style.display = 'none';
+            document.querySelector('.summary-card:last-child').style.display = 'none';
+            
+            updateFavoriteSports(weekData);
+            updateWeeklyProgress(weekData);
+        }
+
+        // Monthly Data Management
+        function checkMonthlyReset() {
+            const lastResetDate = localStorage.getItem('lastAnalyticsReset');
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            if (!lastResetDate) {
+                // First time setup
+                localStorage.setItem('lastAnalyticsReset', `${currentYear}-${currentMonth}`);
+                return;
+            }
+            
+            const [lastYear, lastMonth] = lastResetDate.split('-').map(Number);
+            
+            // Check if we've moved to a new month
+            if (currentYear > lastYear || (currentYear === lastYear && currentMonth > lastMonth)) {
+                // Archive current month data before reset
+                archiveMonthlyData();
+                localStorage.setItem('lastAnalyticsReset', `${currentYear}-${currentMonth}`);
+                
+                // Show notification about new period
+                showAnalyticsNotification('📊 New month started! Your previous month\'s data has been archived.', 'info');
+            }
+        }
+
+        function archiveMonthlyData() {
+            // In a real application, this would send data to the server
+            // For now, we'll store it in localStorage as an example
+            const archivedData = JSON.parse(localStorage.getItem('archivedAnalytics') || '[]');
+            const now = new Date();
+            const lastMonth = now.getMonth() - 1;
+            const year = lastMonth < 0 ? now.getFullYear() - 1 : now.getFullYear();
+            const month = lastMonth < 0 ? 11 : lastMonth;
+            
+            const monthStart = new Date(year, month, 1);
+            const monthEnd = new Date(year, month + 1, 0);
+            const monthData = filterWorkoutsByDateRange(allWorkoutsData, monthStart, monthEnd);
+            
+            if (monthData.length > 0) {
+                const monthStats = calculatePeriodStats(monthData);
+                archivedData.push({
+                    period: `${year}-${month}`,
+                    month: monthEnd.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+                    stats: monthStats,
+                    workouts: monthData.length,
+                    archived: new Date().toISOString()
+                });
+                
+                // Keep only last 12 months
+                if (archivedData.length > 12) {
+                    archivedData.shift();
+                }
+                
+                localStorage.setItem('archivedAnalytics', JSON.stringify(archivedData));
+            }
+        }
+
+        function showAnalyticsNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'analytics-notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 2rem;
+                right: 2rem;
+                padding: 1rem 1.5rem;
+                background: linear-gradient(135deg, rgba(0, 255, 127, 0.9), rgba(0, 200, 100, 0.9));
+                color: black;
+                border-radius: var(--radius-md);
+                font-weight: 600;
+                z-index: 1000;
+                backdrop-filter: blur(20px);
+                box-shadow: 0 8px 25px rgba(0, 255, 127, 0.3);
+                animation: slideInRight 0.5s ease;
+                max-width: 300px;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.5s ease';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 500);
+            }, 5000);
+        }
+
+        // Initialize analytics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkMonthlyReset();
+        });
+
+        // 註冊課程函數
+        async function enrollCourse(courseId) {
+            if (!confirm('Are you sure you want to enroll in this course?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/courses/${courseId}/enroll`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Successfully enrolled in the course!');
+                    loadUserStats(); // 重新載入數據
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Enroll error:', error);
+                alert('Error enrolling in course. Please try again.');
+            }
+        }
+
+        // 如果用戶已登入，載入統計數據
+        <% if (user) { %>
+            document.addEventListener('DOMContentLoaded', loadUserStats);
+        <% } %>
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>
+                    <span class="footer-icon">📧</span>
+                    <a href="mailto:alanluk2226@gmail.com">alanluk2226@gmail.com</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Alan Workout</h4>
+                <p>Your fitness journey starts here</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Your Progress</h4>
+                <p>Track workouts, join courses, achieve goals</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Alan Workout. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/navigation.js"></script>
+    <script src="/js/chatbot.js"></script>
+</body>
+</html>

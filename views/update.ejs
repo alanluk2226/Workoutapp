@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Fitness App</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-brand">🏋️ Fitness Tracker</div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/create" class="nav-link">Create Workout</a>
+                <a href="/read" class="nav-link">My Workouts</a>
+                <% if (user) { %>
+                    <div class="user-info">
+                        <span>Welcome, <%= user.username %>!</span>
+                        <a href="/logout" class="btn btn-danger">Logout</a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="nav-link">Login</a>
+                <% } %>
+            </div>
+        </nav>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Update Workout ✏️</h1>
+                <p>Modify your workout details</p>
+            </div>
+
+            <div id="loadingMessage" style="text-align: center; padding: 2rem;">
+                <p>Loading workout details...</p>
+            </div>
+
+            <form id="workoutForm" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label" for="exerciseName">Choose Sport *</label>
+                    <select class="form-control" id="exerciseName" name="exerciseName" required>
+                        <option value="">Select a sport/exercise</option>
+                        
+                        <!-- Cardio Sports -->
+                        <optgroup label="🏃 Cardio Sports">
+                            <option value="Running" data-type="cardio" data-fields="distance,pace">Running</option>
+                            <option value="Walking" data-type="cardio" data-fields="distance,pace">Walking</option>
+                            <option value="Cycling" data-type="cardio" data-fields="distance,speed">Cycling</option>
+                            <option value="Swimming" data-type="cardio" data-fields="distance,laps">Swimming</option>
+                            <option value="Rowing" data-type="cardio" data-fields="distance,strokes">Rowing</option>
+                            <option value="Elliptical" data-type="cardio" data-fields="distance,resistance">Elliptical</option>
+                            <option value="Stair Climbing" data-type="cardio" data-fields="floors,duration">Stair Climbing</option>
+                            <option value="Jump Rope" data-type="cardio" data-fields="jumps,rounds">Jump Rope</option>
+                        </optgroup>
+                        
+                        <!-- Strength Sports -->
+                        <optgroup label="💪 Strength Training">
+                            <option value="Weightlifting" data-type="strength" data-fields="sets,reps,weight">Weightlifting</option>
+                            <option value="Bodyweight Training" data-type="strength" data-fields="sets,reps">Bodyweight Training</option>
+                            <option value="Push-ups" data-type="strength" data-fields="sets,reps">Push-ups</option>
+                            <option value="Pull-ups" data-type="strength" data-fields="sets,reps">Pull-ups</option>
+                            <option value="Squats" data-type="strength" data-fields="sets,reps,weight">Squats</option>
+                            <option value="Deadlifts" data-type="strength" data-fields="sets,reps,weight">Deadlifts</option>
+                            <option value="Bench Press" data-type="strength" data-fields="sets,reps,weight">Bench Press</option>
+                            <option value="CrossFit" data-type="strength" data-fields="sets,reps,weight">CrossFit</option>
+                        </optgroup>
+                        
+                        <!-- Flexibility & Balance -->
+                        <optgroup label="🧘 Flexibility & Balance">
+                            <option value="Yoga" data-type="flexibility" data-fields="poses,difficulty">Yoga</option>
+                            <option value="Pilates" data-type="flexibility" data-fields="exercises,difficulty">Pilates</option>
+                            <option value="Stretching" data-type="flexibility" data-fields="exercises,difficulty">Stretching</option>
+                            <option value="Meditation" data-type="balance" data-fields="techniques">Meditation</option>
+                        </optgroup>
+                        
+                        <!-- HIIT & High Intensity -->
+                        <optgroup label="🔥 High Intensity">
+                            <option value="HIIT" data-type="high-intensity-interval-training" data-fields="rounds,work_time,rest_time">HIIT</option>
+                            <option value="Burpees" data-type="high-intensity-interval-training" data-fields="sets,reps">Burpees</option>
+                            <option value="Tabata" data-type="high-intensity-interval-training" data-fields="rounds,work_time,rest_time">Tabata</option>
+                        </optgroup>
+                        
+                        <!-- Sports & Games -->
+                        <optgroup label="⚽ Sports & Games">
+                            <option value="Basketball" data-type="sports" data-fields="games,points">Basketball</option>
+                            <option value="Football" data-type="sports" data-fields="games,goals">Football</option>
+                            <option value="Tennis" data-type="sports" data-fields="sets,games">Tennis</option>
+                            <option value="Boxing" data-type="sports" data-fields="rounds,punches">Boxing</option>
+                            <option value="Martial Arts" data-type="sports" data-fields="techniques,rounds">Martial Arts</option>
+                        </optgroup>
+                        
+                        <!-- Dance & Fun -->
+                        <optgroup label="💃 Dance & Fun">
+                            <option value="Dancing" data-type="other" data-fields="songs,style">Dancing</option>
+                            <option value="Zumba" data-type="other" data-fields="songs,routines">Zumba</option>
+                            <option value="Spinning" data-type="cardio" data-fields="distance,resistance">Spinning</option>
+                        </optgroup>
+                        
+                        <!-- Outdoor Activities -->
+                        <optgroup label="🏔️ Outdoor Activities">
+                            <option value="Hiking" data-type="cardio" data-fields="distance,elevation">Hiking</option>
+                            <option value="Rock Climbing" data-type="strength" data-fields="routes,difficulty">Rock Climbing</option>
+                            <option value="Surfing" data-type="sports" data-fields="waves,sessions">Surfing</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Hidden exercise type field (auto-filled) -->
+                <input type="hidden" id="exerciseType" name="exerciseType" value="">
+
+                <!-- Timer Section -->
+                <div class="form-group">
+                    <label class="form-label" for="timerMinutes">Update Timer (minutes) *</label>
+                    <input type="number" class="form-control" id="timerMinutes" name="timerMinutes" 
+                           min="1" max="300" required>
+                </div>
+
+                <div class="timer-section" style="text-align: center; margin: 2rem 0; padding: 2rem; background: var(--color-card-bg); border: 1px solid rgba(0, 255, 127, 0.2); border-radius: var(--radius-lg);">
+                    <div class="timer-display" id="timerDisplay" style="font-size: 3rem; font-weight: bold; color: var(--color-neon-green); margin-bottom: 1rem; text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);">
+                        30:00
+                    </div>
+                    <div class="timer-controls">
+                        <button type="button" id="startTimerBtn" class="btn btn-success" style="margin: 0 0.5rem;">
+                            ▶️ Start Timer
+                        </button>
+                        <button type="button" id="pauseTimerBtn" class="btn btn-secondary" style="margin: 0 0.5rem; display: none;">
+                            ⏸️ Pause
+                        </button>
+                        <button type="button" id="resetTimerBtn" class="btn btn-danger" style="margin: 0 0.5rem;">
+                            🔄 Reset
+                        </button>
+                    </div>
+                    <div id="timerStatus" style="margin-top: 1rem; font-weight: bold; color: var(--color-text-light);">
+                        Update your timer and click start to begin your workout!
+                    </div>
+                </div>
+
+                <!-- 卡路里和強度 -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="caloriesBurned">Calories Burned *</label>
+                        <input type="number" class="form-control" id="caloriesBurned" name="caloriesBurned" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="intensity">Intensity</label>
+                        <select class="form-control" id="intensity" name="intensity">
+                            <option value="light">Light</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="vigorous">Vigorous</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Sport-Specific Details -->
+                <div id="cardioFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Cardio Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="distanceGroup">
+                            <label class="form-label" for="distance">Distance</label>
+                            <input type="number" class="form-control" id="distance" name="distance" min="0" step="0.1">
+                        </div>
+                        <div class="form-group" id="distanceUnitGroup">
+                            <label class="form-label" for="distanceUnit">Unit</label>
+                            <select class="form-control" id="distanceUnit" name="distanceUnit">
+                                <option value="km">Kilometers</option>
+                                <option value="miles">Miles</option>
+                                <option value="meters">Meters</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="paceGroup" style="display: none;">
+                            <label class="form-label" for="pace">Average Pace (min/km)</label>
+                            <input type="number" class="form-control" id="pace" name="pace" min="0" step="0.1">
+                        </div>
+                        <div class="form-group" id="speedGroup" style="display: none;">
+                            <label class="form-label" for="speed">Average Speed (km/h)</label>
+                            <input type="number" class="form-control" id="speed" name="speed" min="0" step="0.1">
+                        </div>
+                        <div class="form-group" id="lapsGroup" style="display: none;">
+                            <label class="form-label" for="laps">Laps Completed</label>
+                            <input type="number" class="form-control" id="laps" name="laps" min="0">
+                        </div>
+                        <div class="form-group" id="strokesGroup" style="display: none;">
+                            <label class="form-label" for="strokes">Strokes per Minute</label>
+                            <input type="number" class="form-control" id="strokes" name="strokes" min="0">
+                        </div>
+                        <div class="form-group" id="resistanceGroup" style="display: none;">
+                            <label class="form-label" for="resistance">Resistance Level</label>
+                            <input type="number" class="form-control" id="resistance" name="resistance" min="1" max="20">
+                        </div>
+                        <div class="form-group" id="floorsGroup" style="display: none;">
+                            <label class="form-label" for="floors">Floors Climbed</label>
+                            <input type="number" class="form-control" id="floors" name="floors" min="0">
+                        </div>
+                        <div class="form-group" id="elevationGroup" style="display: none;">
+                            <label class="form-label" for="elevation">Elevation Gain (m)</label>
+                            <input type="number" class="form-control" id="elevation" name="elevation" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="strengthFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Strength Training Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="setsGroup">
+                            <label class="form-label" for="sets">Sets</label>
+                            <input type="number" class="form-control" id="sets" name="sets" min="0">
+                        </div>
+                        <div class="form-group" id="repsGroup">
+                            <label class="form-label" for="reps">Reps per Set</label>
+                            <input type="number" class="form-control" id="reps" name="reps" min="0">
+                        </div>
+                        <div class="form-group" id="weightGroup">
+                            <label class="form-label" for="weight">Weight (kg)</label>
+                            <input type="number" class="form-control" id="weight" name="weight" min="0" step="0.5">
+                        </div>
+                        <div class="form-group" id="routesGroup" style="display: none;">
+                            <label class="form-label" for="routes">Routes Completed</label>
+                            <input type="number" class="form-control" id="routes" name="routes" min="0">
+                        </div>
+                        <div class="form-group" id="difficultyGroup" style="display: none;">
+                            <label class="form-label" for="difficulty">Difficulty Level</label>
+                            <select class="form-control" id="difficulty" name="difficulty">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                                <option value="expert">Expert</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="flexibilityFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Flexibility & Balance Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="posesGroup">
+                            <label class="form-label" for="poses">Poses/Exercises</label>
+                            <input type="number" class="form-control" id="poses" name="poses" min="0">
+                        </div>
+                        <div class="form-group" id="flexDifficultyGroup">
+                            <label class="form-label" for="flexDifficulty">Difficulty Level</label>
+                            <select class="form-control" id="flexDifficulty" name="flexDifficulty">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="techniquesGroup" style="display: none;">
+                            <label class="form-label" for="techniques">Techniques Practiced</label>
+                            <input type="number" class="form-control" id="techniques" name="techniques" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hiitFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">HIIT Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="roundsGroup">
+                            <label class="form-label" for="rounds">Rounds</label>
+                            <input type="number" class="form-control" id="rounds" name="rounds" min="0">
+                        </div>
+                        <div class="form-group" id="workTimeGroup">
+                            <label class="form-label" for="workTime">Work Time (sec)</label>
+                            <input type="number" class="form-control" id="workTime" name="workTime" min="0">
+                        </div>
+                        <div class="form-group" id="restTimeGroup">
+                            <label class="form-label" for="restTime">Rest Time (sec)</label>
+                            <input type="number" class="form-control" id="restTime" name="restTime" min="0">
+                        </div>
+                        <div class="form-group" id="jumpsGroup" style="display: none;">
+                            <label class="form-label" for="jumps">Total Jumps</label>
+                            <input type="number" class="form-control" id="jumps" name="jumps" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sportsFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Sports Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="gamesGroup">
+                            <label class="form-label" for="games">Games/Matches</label>
+                            <input type="number" class="form-control" id="games" name="games" min="0">
+                        </div>
+                        <div class="form-group" id="pointsGroup" style="display: none;">
+                            <label class="form-label" for="points">Points Scored</label>
+                            <input type="number" class="form-control" id="points" name="points" min="0">
+                        </div>
+                        <div class="form-group" id="goalsGroup" style="display: none;">
+                            <label class="form-label" for="goals">Goals Scored</label>
+                            <input type="number" class="form-control" id="goals" name="goals" min="0">
+                        </div>
+                        <div class="form-group" id="punchesGroup" style="display: none;">
+                            <label class="form-label" for="punches">Punches Thrown</label>
+                            <input type="number" class="form-control" id="punches" name="punches" min="0">
+                        </div>
+                        <div class="form-group" id="wavesGroup" style="display: none;">
+                            <label class="form-label" for="waves">Waves Caught</label>
+                            <input type="number" class="form-control" id="waves" name="waves" min="0">
+                        </div>
+                        <div class="form-group" id="sessionsGroup" style="display: none;">
+                            <label class="form-label" for="sessions">Sessions</label>
+                            <input type="number" class="form-control" id="sessions" name="sessions" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="otherFields" style="display: none;">
+                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--color-neon-green);">Activity Details</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group" id="songsGroup">
+                            <label class="form-label" for="songs">Songs/Tracks</label>
+                            <input type="number" class="form-control" id="songs" name="songs" min="0">
+                        </div>
+                        <div class="form-group" id="styleGroup" style="display: none;">
+                            <label class="form-label" for="style">Dance Style</label>
+                            <input type="text" class="form-control" id="style" name="style" placeholder="e.g., Hip-hop, Salsa">
+                        </div>
+                        <div class="form-group" id="routinesGroup" style="display: none;">
+                            <label class="form-label" for="routines">Routines Completed</label>
+                            <input type="number" class="form-control" id="routines" name="routines" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 備註 -->
+                <div class="form-group">
+                    <label class="form-label" for="notes">Notes</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        Update Workout
+                    </button>
+                    <button type="button" onclick="goBack()" class="btn btn-danger" style="flex: 1;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/chatbot.js"></script>
+
+    <script>
+        // Timer functionality
+        let timerInterval;
+        let isTimerRunning = false;
+        let isPaused = false;
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+        let workoutStartTime = null;
+        let actualDuration = 0;
+
+        // Initialize timer display
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Update timer when input changes
+        document.getElementById('timerMinutes').addEventListener('input', function(e) {
+            if (!isTimerRunning) {
+                const minutes = parseInt(e.target.value) || 30;
+                totalSeconds = minutes * 60;
+                remainingSeconds = totalSeconds;
+                updateTimerDisplay();
+            }
+        });
+
+        // Start timer
+        document.getElementById('startTimerBtn').addEventListener('click', function() {
+            if (!isTimerRunning && !isPaused) {
+                const minutes = parseInt(document.getElementById('timerMinutes').value) || 30;
+                totalSeconds = minutes * 60;
+                remainingSeconds = totalSeconds;
+                workoutStartTime = new Date();
+            }
+
+            isTimerRunning = true;
+            isPaused = false;
+            
+            document.getElementById('startTimerBtn').style.display = 'none';
+            document.getElementById('pauseTimerBtn').style.display = 'inline-block';
+            document.getElementById('timerStatus').textContent = 'Workout in progress... Keep going! 💪';
+            document.getElementById('timerStatus').style.color = 'var(--color-success)';
+
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                updateTimerDisplay();
+
+                if (remainingSeconds <= 0) {
+                    completeTimer();
+                }
+            }, 1000);
+        });
+
+        // Pause timer
+        document.getElementById('pauseTimerBtn').addEventListener('click', function() {
+            isTimerRunning = false;
+            isPaused = true;
+            clearInterval(timerInterval);
+            
+            document.getElementById('startTimerBtn').style.display = 'inline-block';
+            document.getElementById('startTimerBtn').textContent = '▶️ Resume';
+            document.getElementById('pauseTimerBtn').style.display = 'none';
+            document.getElementById('timerStatus').textContent = 'Timer paused. Click resume to continue.';
+            document.getElementById('timerStatus').style.color = 'var(--color-accent)';
+        });
+
+        // Reset timer
+        document.getElementById('resetTimerBtn').addEventListener('click', function() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            isPaused = false;
+            workoutStartTime = null;
+            actualDuration = 0;
+            
+            const minutes = parseInt(document.getElementById('timerMinutes').value) || 30;
+            totalSeconds = minutes * 60;
+            remainingSeconds = totalSeconds;
+            updateTimerDisplay();
+            
+            document.getElementById('startTimerBtn').style.display = 'inline-block';
+            document.getElementById('startTimerBtn').textContent = '▶️ Start Timer';
+            document.getElementById('pauseTimerBtn').style.display = 'none';
+            document.getElementById('timerStatus').textContent = 'Update your timer and click start to begin your workout!';
+            document.getElementById('timerStatus').style.color = 'var(--color-text-light)';
+        });
+
+        // Complete timer
+        function completeTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            isPaused = false;
+            
+            // Calculate actual duration
+            if (workoutStartTime) {
+                actualDuration = Math.round((new Date() - workoutStartTime) / 1000 / 60);
+            }
+            
+            document.getElementById('timerDisplay').textContent = '00:00';
+            document.getElementById('startTimerBtn').style.display = 'inline-block';
+            document.getElementById('startTimerBtn').textContent = '▶️ Start Timer';
+            document.getElementById('pauseTimerBtn').style.display = 'none';
+            document.getElementById('timerStatus').textContent = '🎉 Workout Complete! Great job!';
+            document.getElementById('timerStatus').style.color = 'var(--color-success)';
+            
+            // Show completion notification
+            showNotification('🎉 Workout timer completed! Great job!', 'success');
+        }
+
+        // 從URL獲取workout ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const workoutId = urlParams.get('id');
+
+        if (!workoutId) {
+            document.getElementById('loadingMessage').innerHTML = `
+                <div style="color: red; text-align: center;">
+                    ❌ No workout ID provided. Please select a workout to edit from the <a href="/read">My Workouts</a> page.
+                </div>
+            `;
+        } else {
+            loadWorkoutDetails(workoutId);
+        }
+
+        // 載入訓練詳情
+        async function loadWorkoutDetails(id) {
+            try {
+                const response = await fetch(`/api/workouts/${id}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const workout = data.workout;
+                    populateForm(workout);
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('workoutForm').style.display = 'block';
+                } else {
+                    document.getElementById('loadingMessage').innerHTML = `
+                        <div style="color: red; text-align: center;">
+                            ❌ Error loading workout: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading workout:', error);
+                document.getElementById('loadingMessage').innerHTML = `
+                    <div style="color: red; text-align: center;">
+                        ❌ Network error. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // 填充表單數據
+        function populateForm(workout) {
+            // Set the exercise name (this will trigger the field display)
+            document.getElementById('exerciseName').value = workout.exerciseName;
+            
+            // Trigger the change event to show appropriate fields
+            const event = new Event('change');
+            document.getElementById('exerciseName').dispatchEvent(event);
+            
+            document.getElementById('timerMinutes').value = workout.duration;
+            document.getElementById('caloriesBurned').value = workout.caloriesBurned;
+            document.getElementById('intensity').value = workout.intensity;
+            document.getElementById('notes').value = workout.notes || '';
+
+            // Update timer display
+            const minutes = workout.duration || 30;
+            totalSeconds = minutes * 60;
+            remainingSeconds = totalSeconds;
+            updateTimerDisplay();
+
+            // Wait a bit for fields to be displayed, then populate them
+            setTimeout(() => {
+                // 填充特定字段
+                if (workout.sets) document.getElementById('sets').value = workout.sets;
+                if (workout.reps) document.getElementById('reps').value = workout.reps;
+                if (workout.weight) document.getElementById('weight').value = workout.weight;
+                if (workout.distance) document.getElementById('distance').value = workout.distance;
+                if (workout.distanceUnit) document.getElementById('distanceUnit').value = workout.distanceUnit;
+                
+                // Fill additional sport-specific fields
+                if (workout.pace) document.getElementById('pace').value = workout.pace;
+                if (workout.speed) document.getElementById('speed').value = workout.speed;
+                if (workout.laps) document.getElementById('laps').value = workout.laps;
+                if (workout.strokes) document.getElementById('strokes').value = workout.strokes;
+                if (workout.resistance) document.getElementById('resistance').value = workout.resistance;
+                if (workout.floors) document.getElementById('floors').value = workout.floors;
+                if (workout.elevation) document.getElementById('elevation').value = workout.elevation;
+                if (workout.routes) document.getElementById('routes').value = workout.routes;
+                if (workout.difficulty) document.getElementById('difficulty').value = workout.difficulty;
+                if (workout.poses) document.getElementById('poses').value = workout.poses;
+                if (workout.flexDifficulty) document.getElementById('flexDifficulty').value = workout.flexDifficulty;
+                if (workout.techniques) document.getElementById('techniques').value = workout.techniques;
+                if (workout.rounds) document.getElementById('rounds').value = workout.rounds;
+                if (workout.workTime) document.getElementById('workTime').value = workout.workTime;
+                if (workout.restTime) document.getElementById('restTime').value = workout.restTime;
+                if (workout.jumps) document.getElementById('jumps').value = workout.jumps;
+                if (workout.games) document.getElementById('games').value = workout.games;
+                if (workout.points) document.getElementById('points').value = workout.points;
+                if (workout.goals) document.getElementById('goals').value = workout.goals;
+                if (workout.punches) document.getElementById('punches').value = workout.punches;
+                if (workout.waves) document.getElementById('waves').value = workout.waves;
+                if (workout.sessions) document.getElementById('sessions').value = workout.sessions;
+                if (workout.songs) document.getElementById('songs').value = workout.songs;
+                if (workout.style) document.getElementById('style').value = workout.style;
+                if (workout.routines) document.getElementById('routines').value = workout.routines;
+            }, 100);
+        }
+
+        // Smart sport selection and field management
+        document.getElementById('exerciseName').addEventListener('change', function(e) {
+            const selectedOption = e.target.selectedOptions[0];
+            if (!selectedOption || !selectedOption.value) {
+                hideAllFields();
+                return;
+            }
+
+            const sportType = selectedOption.getAttribute('data-type');
+            const sportFields = selectedOption.getAttribute('data-fields');
+            
+            // Set the hidden exercise type
+            document.getElementById('exerciseType').value = sportType;
+            
+            // Hide all field groups first
+            hideAllFields();
+            
+            // Show appropriate fields based on sport type and specific fields
+            showFieldsForSport(sportType, sportFields);
+        });
+
+        function hideAllFields() {
+            // Hide all main field groups
+            const fieldGroups = ['cardioFields', 'strengthFields', 'flexibilityFields', 'hiitFields', 'sportsFields', 'otherFields'];
+            fieldGroups.forEach(groupId => {
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'none';
+            });
+            
+            // Hide all individual field groups
+            const allFieldGroups = [
+                'distanceGroup', 'distanceUnitGroup', 'paceGroup', 'speedGroup', 'lapsGroup', 
+                'strokesGroup', 'resistanceGroup', 'floorsGroup', 'elevationGroup',
+                'setsGroup', 'repsGroup', 'weightGroup', 'routesGroup', 'difficultyGroup',
+                'posesGroup', 'flexDifficultyGroup', 'techniquesGroup',
+                'roundsGroup', 'workTimeGroup', 'restTimeGroup', 'jumpsGroup',
+                'gamesGroup', 'pointsGroup', 'goalsGroup', 'punchesGroup', 'wavesGroup', 'sessionsGroup',
+                'songsGroup', 'styleGroup', 'routinesGroup'
+            ];
+            
+            allFieldGroups.forEach(groupId => {
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'none';
+            });
+        }
+
+        function showFieldsForSport(sportType, sportFields) {
+            const fieldsArray = sportFields ? sportFields.split(',') : [];
+            
+            switch(sportType) {
+                case 'cardio':
+                    document.getElementById('cardioFields').style.display = 'block';
+                    showCardioFields(fieldsArray);
+                    break;
+                    
+                case 'strength':
+                    document.getElementById('strengthFields').style.display = 'block';
+                    showStrengthFields(fieldsArray);
+                    break;
+                    
+                case 'flexibility':
+                case 'balance':
+                    document.getElementById('flexibilityFields').style.display = 'block';
+                    showFlexibilityFields(fieldsArray);
+                    break;
+                    
+                case 'high-intensity-interval-training':
+                    document.getElementById('hiitFields').style.display = 'block';
+                    showHIITFields(fieldsArray);
+                    break;
+                    
+                case 'sports':
+                    document.getElementById('sportsFields').style.display = 'block';
+                    showSportsFields(fieldsArray);
+                    break;
+                    
+                case 'other':
+                    document.getElementById('otherFields').style.display = 'block';
+                    showOtherFields(fieldsArray);
+                    break;
+            }
+        }
+
+        function showCardioFields(fields) {
+            // Always show distance and unit for cardio
+            document.getElementById('distanceGroup').style.display = 'block';
+            document.getElementById('distanceUnitGroup').style.display = 'block';
+            
+            fields.forEach(field => {
+                const groupId = field + 'Group';
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'block';
+            });
+        }
+
+        function showStrengthFields(fields) {
+            fields.forEach(field => {
+                const groupId = field + 'Group';
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'block';
+            });
+        }
+
+        function showFlexibilityFields(fields) {
+            fields.forEach(field => {
+                if (field === 'poses' || field === 'exercises') {
+                    document.getElementById('posesGroup').style.display = 'block';
+                } else if (field === 'difficulty') {
+                    document.getElementById('flexDifficultyGroup').style.display = 'block';
+                } else {
+                    const groupId = field + 'Group';
+                    const group = document.getElementById(groupId);
+                    if (group) group.style.display = 'block';
+                }
+            });
+        }
+
+        function showHIITFields(fields) {
+            fields.forEach(field => {
+                const groupId = field.replace('_', '') + 'Group';
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'block';
+            });
+        }
+
+        function showSportsFields(fields) {
+            // Always show games for sports
+            document.getElementById('gamesGroup').style.display = 'block';
+            
+            fields.forEach(field => {
+                if (field !== 'games') {
+                    const groupId = field + 'Group';
+                    const group = document.getElementById(groupId);
+                    if (group) group.style.display = 'block';
+                }
+            });
+        }
+
+        function showOtherFields(fields) {
+            fields.forEach(field => {
+                const groupId = field + 'Group';
+                const group = document.getElementById(groupId);
+                if (group) group.style.display = 'block';
+            });
+        }
+
+        // 表單提交
+        document.getElementById('workoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Add timer-related data
+            data.date = new Date().toISOString().split('T')[0]; // Current date
+            data.duration = actualDuration || parseInt(data.timerMinutes); // Use actual duration if timer was used
+            data.startTime = workoutStartTime ? workoutStartTime.toTimeString().slice(0, 5) : new Date().toTimeString().slice(0, 5);
+            
+            // Calculate end time
+            const endTime = new Date();
+            if (workoutStartTime && actualDuration) {
+                endTime.setTime(workoutStartTime.getTime() + (actualDuration * 60 * 1000));
+            } else {
+                endTime.setTime(endTime.getTime() + (parseInt(data.timerMinutes) * 60 * 1000));
+            }
+            data.endTime = endTime.toTimeString().slice(0, 5);
+
+            // 轉換數據類型
+            data.duration = parseInt(data.duration);
+            data.caloriesBurned = parseInt(data.caloriesBurned);
+            data.sets = data.sets ? parseInt(data.sets) : undefined;
+            data.reps = data.reps ? parseInt(data.reps) : undefined;
+            data.weight = data.weight ? parseFloat(data.weight) : undefined;
+            data.distance = data.distance ? parseFloat(data.distance) : undefined;
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Updating...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/workouts/${workoutId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('✅ Workout updated successfully! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/read';
+                    }, 1500);
+                } else {
+                    showNotification(`❌ Error: ${result.error || 'Failed to update workout'}`, 'error');
+                }
+            } catch (error) {
+                showNotification('❌ Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        function goBack() {
+            window.location.href = '/read';
+        }
+
+        // Notification function
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification animate-slide-up';
+            
+            const colors = {
+                success: 'var(--color-success)',
+                error: 'var(--color-error)',
+                info: 'var(--color-primary)',
+                warning: 'var(--color-accent)'
+            };
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: var(--space-lg);
+                right: var(--space-lg);
+                padding: var(--space-md) var(--space-lg);
+                border-radius: var(--radius-lg);
+                color: white;
+                font-weight: var(--font-weight-medium);
+                font-family: var(--font-primary);
+                z-index: 1000;
+                backdrop-filter: blur(20px);
+                border: 1px solid ${colors[type] || colors.info};
+                box-shadow: var(--shadow-lg), 0 8px 25px ${colors[type] || colors.info}33;
+                background: linear-gradient(135deg, ${colors[type] || colors.info}, ${colors[type] || colors.info}dd);
+                max-width: 400px;
+                word-wrap: break-word;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut var(--duration-moderate) var(--ease-acceleration)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 350);
+            }, 4000);
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>
+                    <span class="footer-icon">📧</span>
+                    <a href="mailto:alanluk2226@gmail.com">alanluk2226@gmail.com</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Alan Workout</h4>
+                <p>Your fitness journey starts here</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Your Progress</h4>
+                <p>Track workouts, join courses, achieve goals</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Alan Workout. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/navigation.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Fitness App</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="nav-brand">🏋️ Fitness Tracker</div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/create" class="nav-link">Create Workout</a>
+                <a href="/read" class="nav-link">My Workouts</a>
+                <% if (user) { %>
+                    <div class="user-info">
+                        <span>Welcome, <%= user.username %>!</span>
+                        <a href="/logout" class="btn btn-danger">Logout</a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="nav-link">Login</a>
+                <% } %>
+            </div>
+        </nav>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Delete Workout 🗑️</h1>
+                <p>Select a workout to delete</p>
+            </div>
+
+            <div id="workoutsList">
+                <div style="text-align: center; padding: 2rem;">
+                    <p>Loading your workouts...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 載入訓練數據
+        async function loadWorkouts() {
+            try {
+                const response = await fetch('/api/workouts');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayWorkoutsForDeletion(data.workouts);
+                }
+            } catch (error) {
+                console.error('Error loading workouts:', error);
+                document.getElementById('workoutsList').innerHTML = `
+                    <div style="text-align: center; color: red;">
+                        Error loading workouts. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // 顯示用於刪除的訓練列表
+        function displayWorkoutsForDeletion(workouts) {
+            const container = document.getElementById('workoutsList');
+            
+            if (workouts.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem;">
+                        <h3>No workouts found</h3>
+                        <p>You don't have any workouts to delete. <a href="/create">Create a new workout</a></p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = workouts.map(workout => `
+                <div class="workout-card fade-in">
+                    <div class="workout-header">
+                        <div class="workout-title">${workout.exerciseName}</div>
+                        <div class="workout-actions">
+                            <button onclick="confirmDelete('${workout._id}', '${workout.exerciseName}')" 
+                                    class="btn btn-danger" style="padding: 0.5rem 1rem;">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="workout-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span>${workout.exerciseType}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Date</span>
+                            <span>${new Date(workout.date).toLocaleDateString()}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Duration</span>
+                            <span>${workout.duration} mins</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Calories</span>
+                            <span>${workout.caloriesBurned}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 確認刪除
+        async function confirmDelete(workoutId, workoutName) {
+            if (confirm(`Are you sure you want to delete "${workoutName}"? This action cannot be undone.`)) {
+                await deleteWorkout(workoutId);
+            }
+        }
+
+        // 刪除訓練
+        async function deleteWorkout(workoutId) {
+            try {
+                const response = await fetch(`/api/workouts/${workoutId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Workout deleted successfully!');
+                    loadWorkouts(); // 重新載入列表
+                } else {
+                    alert('Error deleting workout: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error deleting workout:', error);
+                alert('Error deleting workout. Please try again.');
+            }
+        }
+
+        // 頁面載入時獲取訓練數據
+        document.addEventListener('DOMContentLoaded', loadWorkouts);
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>
+                    <span class="footer-icon">📧</span>
+                    <a href="mailto:alanluk2226@gmail.com">alanluk2226@gmail.com</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h4>Alan Workout</h4>
+                <p>Your fitness journey starts here</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Your Progress</h4>
+                <p>Track workouts, join courses, achieve goals</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Alan Workout. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
