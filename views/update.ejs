@@ -108,31 +108,11 @@
                 <!-- Hidden exercise type field (auto-filled) -->
                 <input type="hidden" id="exerciseType" name="exerciseType" value="">
 
-                <!-- Timer Section -->
+                <!-- Duration Input -->
                 <div class="form-group">
-                    <label class="form-label" for="timerMinutes">Update Timer (minutes) *</label>
-                    <input type="number" class="form-control" id="timerMinutes" name="timerMinutes" 
+                    <label class="form-label" for="duration">Duration (minutes) *</label>
+                    <input type="number" class="form-control" id="duration" name="duration" 
                            min="1" max="300" required>
-                </div>
-
-                <div class="timer-section" style="text-align: center; margin: 2rem 0; padding: 2rem; background: var(--color-card-bg); border: 1px solid rgba(0, 255, 127, 0.2); border-radius: var(--radius-lg);">
-                    <div class="timer-display" id="timerDisplay" style="font-size: 3rem; font-weight: bold; color: var(--color-neon-green); margin-bottom: 1rem; text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);">
-                        30:00
-                    </div>
-                    <div class="timer-controls">
-                        <button type="button" id="startTimerBtn" class="btn btn-success" style="margin: 0 0.5rem;">
-                            ▶️ Start Timer
-                        </button>
-                        <button type="button" id="pauseTimerBtn" class="btn btn-secondary" style="margin: 0 0.5rem; display: none;">
-                            ⏸️ Pause
-                        </button>
-                        <button type="button" id="resetTimerBtn" class="btn btn-danger" style="margin: 0 0.5rem;">
-                            🔄 Reset
-                        </button>
-                    </div>
-                    <div id="timerStatus" style="margin-top: 1rem; font-weight: bold; color: var(--color-text-light);">
-                        Update your timer and click start to begin your workout!
-                    </div>
                 </div>
 
                 <!-- 卡路里和強度 -->
@@ -343,115 +323,6 @@
     <script src="/js/chatbot.js"></script>
 
     <script>
-        // Timer functionality
-        let timerInterval;
-        let isTimerRunning = false;
-        let isPaused = false;
-        let totalSeconds = 0;
-        let remainingSeconds = 0;
-        let workoutStartTime = null;
-        let actualDuration = 0;
-
-        // Initialize timer display
-        function updateTimerDisplay() {
-            const minutes = Math.floor(remainingSeconds / 60);
-            const seconds = remainingSeconds % 60;
-            document.getElementById('timerDisplay').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // Update timer when input changes
-        document.getElementById('timerMinutes').addEventListener('input', function(e) {
-            if (!isTimerRunning) {
-                const minutes = parseInt(e.target.value) || 30;
-                totalSeconds = minutes * 60;
-                remainingSeconds = totalSeconds;
-                updateTimerDisplay();
-            }
-        });
-
-        // Start timer
-        document.getElementById('startTimerBtn').addEventListener('click', function() {
-            if (!isTimerRunning && !isPaused) {
-                const minutes = parseInt(document.getElementById('timerMinutes').value) || 30;
-                totalSeconds = minutes * 60;
-                remainingSeconds = totalSeconds;
-                workoutStartTime = new Date();
-            }
-
-            isTimerRunning = true;
-            isPaused = false;
-            
-            document.getElementById('startTimerBtn').style.display = 'none';
-            document.getElementById('pauseTimerBtn').style.display = 'inline-block';
-            document.getElementById('timerStatus').textContent = 'Workout in progress... Keep going! 💪';
-            document.getElementById('timerStatus').style.color = 'var(--color-success)';
-
-            timerInterval = setInterval(() => {
-                remainingSeconds--;
-                updateTimerDisplay();
-
-                if (remainingSeconds <= 0) {
-                    completeTimer();
-                }
-            }, 1000);
-        });
-
-        // Pause timer
-        document.getElementById('pauseTimerBtn').addEventListener('click', function() {
-            isTimerRunning = false;
-            isPaused = true;
-            clearInterval(timerInterval);
-            
-            document.getElementById('startTimerBtn').style.display = 'inline-block';
-            document.getElementById('startTimerBtn').textContent = '▶️ Resume';
-            document.getElementById('pauseTimerBtn').style.display = 'none';
-            document.getElementById('timerStatus').textContent = 'Timer paused. Click resume to continue.';
-            document.getElementById('timerStatus').style.color = 'var(--color-accent)';
-        });
-
-        // Reset timer
-        document.getElementById('resetTimerBtn').addEventListener('click', function() {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            isPaused = false;
-            workoutStartTime = null;
-            actualDuration = 0;
-            
-            const minutes = parseInt(document.getElementById('timerMinutes').value) || 30;
-            totalSeconds = minutes * 60;
-            remainingSeconds = totalSeconds;
-            updateTimerDisplay();
-            
-            document.getElementById('startTimerBtn').style.display = 'inline-block';
-            document.getElementById('startTimerBtn').textContent = '▶️ Start Timer';
-            document.getElementById('pauseTimerBtn').style.display = 'none';
-            document.getElementById('timerStatus').textContent = 'Update your timer and click start to begin your workout!';
-            document.getElementById('timerStatus').style.color = 'var(--color-text-light)';
-        });
-
-        // Complete timer
-        function completeTimer() {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            isPaused = false;
-            
-            // Calculate actual duration
-            if (workoutStartTime) {
-                actualDuration = Math.round((new Date() - workoutStartTime) / 1000 / 60);
-            }
-            
-            document.getElementById('timerDisplay').textContent = '00:00';
-            document.getElementById('startTimerBtn').style.display = 'inline-block';
-            document.getElementById('startTimerBtn').textContent = '▶️ Start Timer';
-            document.getElementById('pauseTimerBtn').style.display = 'none';
-            document.getElementById('timerStatus').textContent = '🎉 Workout Complete! Great job!';
-            document.getElementById('timerStatus').style.color = 'var(--color-success)';
-            
-            // Show completion notification
-            showNotification('🎉 Workout timer completed! Great job!', 'success');
-        }
-
         // 從URL獲取workout ID
         const urlParams = new URLSearchParams(window.location.search);
         const workoutId = urlParams.get('id');
@@ -523,18 +394,12 @@
             const event = new Event('change');
             exerciseNameField.dispatchEvent(event);
             
-            document.getElementById('timerMinutes').value = workout.duration;
+            document.getElementById('duration').value = workout.duration;
             document.getElementById('caloriesBurned').value = workout.caloriesBurned;
             document.getElementById('intensity').value = workout.intensity;
             document.getElementById('notes').value = workout.notes || '';
 
             console.log('Basic fields populated');
-
-            // Update timer display
-            const minutes = workout.duration || 30;
-            totalSeconds = minutes * 60;
-            remainingSeconds = totalSeconds;
-            updateTimerDisplay();
 
             // Wait a bit for fields to be displayed, then populate them
             setTimeout(() => {
