@@ -375,16 +375,28 @@ app.get('/api/workouts/:id', requireAuth, async (req, res) => {
 // Update (CRUD) workout
 app.put('/api/workouts/:id', requireAuth, async (req, res) => {
     try {
+        console.log('Update workout request:', {
+            id: req.params.id,
+            userId: req.session.user.id,
+            body: req.body
+        });
+        
         const workout = await Workout.findOneAndUpdate({ 
             _id: req.params.id, 
             user: req.session.user.id },
             req.body,
-            { new: true }
+            { new: true, runValidators: true }
         );
-        if (!workout) return res.status(404).json({ 
-            success: false, 
-            error: 'Workout schedule not found' 
-        });
+        
+        if (!workout) {
+            console.log('Workout not found');
+            return res.status(404).json({ 
+                success: false, 
+                error: 'Workout schedule not found' 
+            });
+        }
+        
+        console.log('Workout updated successfully:', workout);
         res.json({ 
             success: true, 
             workout 
@@ -393,7 +405,7 @@ app.put('/api/workouts/:id', requireAuth, async (req, res) => {
         console.error('Update workout error:', error);
         res.status(500).json({ 
             success: false, 
-            error: "server error"
+            error: error.message || "server error"
         });
     }
 });
@@ -692,6 +704,167 @@ app.get("/coach/:coachId", async (req, res) => {
             title: "Error",
             user: req.session.user || null
         });
+    }
+});
+
+// Admin routes
+app.get("/admin", requireAuth, (req, res) => {
+    res.status(200).render('admin', { 
+        title: "Admin Dashboard",
+        user: req.session.user 
+    });
+});
+
+// Admin API - Get all courses
+app.get('/api/admin/courses', requireAuth, async (req, res) => {
+    try {
+        const courses = await Course.find().populate('coach');
+        res.json({ success: true, courses });
+    } catch (error) {
+        console.error('Admin get courses error:', error);
+        res.status(500).json({ success: false, error: "Server error" });
+    }
+});
+
+// Admin API - Create course
+app.post('/api/admin/courses', requireAuth, async (req, res) => {
+    try {
+        const course = new Course(req.body);
+        await course.save();
+        res.json({ success: true, course });
+    } catch (error) {
+        console.error('Admin create course error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin API - Update course
+app.put('/api/admin/courses/:id', requireAuth, async (req, res) => {
+    try {
+        const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!course) return res.status(404).json({ success: false, error: 'Course not found' });
+        res.json({ success: true, course });
+    } catch (error) {
+        console.error('Admin update course error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin API - Delete course
+app.delete('/api/admin/courses/:id', requireAuth, async (req, res) => {
+    try {
+        const course = await Course.findByIdAndDelete(req.params.id);
+        if (!course) return res.status(404).json({ success: false, error: 'Course not found' });
+        res.json({ success: true, message: 'Course deleted' });
+    } catch (error) {
+        console.error('Admin delete course error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin API - Get all coaches
+app.get('/api/admin/coaches', requireAuth, async (req, res) => {
+    try {
+        const coaches = await Coach.find();
+        res.json({ success: true, coaches });
+    } catch (error) {
+        console.error('Admin get coaches error:', error);
+        res.status(500).json({ success: false, error: "Server error" });
+    }
+});
+
+// Admin API - Create coach
+app.post('/api/admin/coaches', requireAuth, async (req, res) => {
+    try {
+        const coach = new Coach(req.body);
+        await coach.save();
+        res.json({ success: true, coach });
+    } catch (error) {
+        console.error('Admin create coach error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin API - Update coach
+app.put('/api/admin/coaches/:id', requireAuth, async (req, res) => {
+    try {
+        const coach = await Coach.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!coach) return res.status(404).json({ success: false, error: 'Coach not found' });
+        res.json({ success: true, coach });
+    } catch (error) {
+        console.error('Admin update coach error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin API - Delete coach
+app.delete('/api/admin/coaches/:id', requireAuth, async (req, res) => {
+    try {
+        const coach = await Coach.findByIdAndDelete(req.params.id);
+        if (!coach) return res.status(404).json({ success: false, error: 'Coach not found' });
+        res.json({ success: true, message: 'Coach deleted' });
+    } catch (error) {
+        console.error('Admin delete coach error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin API - Get all users
+app.get('/api/admin/users', requireAuth, async (req, res) => {
+    try {
+        const users = await User.find({}, { password: 0 });
+        res.json({ success: true, users });
+    } catch (error) {
+        console.error('Admin get users error:', error);
+        res.status(500).json({ success: false, error: "Server error" });
+    }
+});
+
+// Admin API - Change user password
+app.put('/api/admin/users/:id/password', requireAuth, async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { password: hashedPassword },
+            { new: true }
+        );
+        
+        if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+        res.json({ success: true, message: 'Password updated' });
+    } catch (error) {
+        console.error('Admin change password error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin API - Delete user
+app.delete('/api/admin/users/:id', requireAuth, async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id);
+        if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+        
+        // Also delete user's workouts and enrollments
+        await Workout.deleteMany({ user: req.params.id });
+        await Enrollment.deleteMany({ user: req.params.id });
+        
+        res.json({ success: true, message: 'User deleted' });
+    } catch (error) {
+        console.error('Admin delete user error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin API - Get enrollments count
+app.get('/api/admin/enrollments', requireAuth, async (req, res) => {
+    try {
+        const enrollments = await Enrollment.find();
+        res.json({ success: true, enrollments });
+    } catch (error) {
+        console.error('Admin get enrollments error:', error);
+        res.status(500).json({ success: false, error: "Server error" });
     }
 });
 
