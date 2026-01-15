@@ -730,22 +730,11 @@
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
 
-            // Add timer-related data
-            data.date = new Date().toISOString().split('T')[0]; // Current date
-            data.duration = actualDuration || parseInt(data.timerMinutes); // Use actual duration if timer was used
-            data.startTime = workoutStartTime ? workoutStartTime.toTimeString().slice(0, 5) : new Date().toTimeString().slice(0, 5);
-            
-            // Calculate end time
-            const endTime = new Date();
-            if (workoutStartTime && actualDuration) {
-                endTime.setTime(workoutStartTime.getTime() + (actualDuration * 60 * 1000));
-            } else {
-                endTime.setTime(endTime.getTime() + (parseInt(data.timerMinutes) * 60 * 1000));
-            }
-            data.endTime = endTime.toTimeString().slice(0, 5);
+            // Remove timerMinutes as it's not a model field
+            delete data.timerMinutes;
 
             // 轉換數據類型
-            data.duration = parseInt(data.duration);
+            data.duration = parseInt(data.duration) || parseInt(data.timerMinutes);
             data.caloriesBurned = parseInt(data.caloriesBurned);
             data.sets = data.sets ? parseInt(data.sets) : undefined;
             data.reps = data.reps ? parseInt(data.reps) : undefined;
