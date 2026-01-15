@@ -31,11 +31,11 @@
                 <p>Modify your workout details</p>
             </div>
 
-            <div id="loadingMessage" style="text-align: center; padding: 2rem;">
+            <div id="loadingMessage" style="text-align: center; padding: 2rem; position: absolute; background: var(--color-bg); width: 100%; z-index: 10;">
                 <p>Loading workout details...</p>
             </div>
 
-            <form id="workoutForm" style="display: none;">
+            <form id="workoutForm">
                 <div class="form-group">
                     <label class="form-label" for="exerciseName">Choose Sport *</label>
                     <select class="form-control" id="exerciseName" name="exerciseName" required>
@@ -479,22 +479,14 @@
                     const workout = data.workout;
                     console.log('Workout data:', workout);
                     
-                    // Hide loading message first
+                    // Populate form first
+                    populateForm(workout);
+                    
+                    // Then hide loading message
                     const loadingMsg = document.getElementById('loadingMessage');
                     loadingMsg.style.display = 'none';
                     
-                    // Show form with multiple methods to ensure visibility
-                    const form = document.getElementById('workoutForm');
-                    form.style.display = 'block';
-                    form.style.visibility = 'visible';
-                    form.style.opacity = '1';
-                    
-                    console.log('Form display changed to block');
-                    console.log('Form element:', form);
-                    console.log('Form computed style:', window.getComputedStyle(form).display);
-                    
-                    // Populate form after showing it
-                    populateForm(workout);
+                    console.log('Form should now be visible');
                 } else {
                     console.error('API returned error:', data.error);
                     document.getElementById('loadingMessage').innerHTML = `
