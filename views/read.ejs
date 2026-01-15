@@ -151,8 +151,8 @@
                 return;
             }
 
-            container.innerHTML = workouts.map(workout => `
-                <div class="workout-card fade-in">
+            container.innerHTML = workouts.map((workout, index) => `
+                <div class="workout-card fade-in" id="workout-${workout._id}">
                     <div class="workout-header">
                         <div class="workout-title">${workout.exerciseName}</div>
                         <div class="workout-actions">
@@ -162,6 +162,27 @@
                             <button onclick="deleteWorkout('${workout._id}')" class="btn btn-danger" style="padding: 0.5rem 1rem;">
                                 Delete
                             </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Timer Section -->
+                    <div class="timer-section" style="text-align: center; margin: 1rem 0; padding: 1.5rem; background: rgba(0, 255, 127, 0.05); border: 1px solid rgba(0, 255, 127, 0.2); border-radius: 8px;">
+                        <div class="timer-display" id="timer-display-${workout._id}" style="font-size: 2rem; font-weight: bold; color: var(--color-neon-green); margin-bottom: 1rem;">
+                            ${Math.floor(workout.duration)}:00
+                        </div>
+                        <div class="timer-controls" style="display: flex; gap: 0.5rem; justify-content: center;">
+                            <button onclick="startTimer('${workout._id}', ${workout.duration})" id="start-btn-${workout._id}" class="btn btn-success" style="padding: 0.5rem 1rem;">
+                                ▶️ Start
+                            </button>
+                            <button onclick="pauseTimer('${workout._id}')" id="pause-btn-${workout._id}" class="btn btn-secondary" style="padding: 0.5rem 1rem; display: none;">
+                                ⏸️ Pause
+                            </button>
+                            <button onclick="resetTimer('${workout._id}', ${workout.duration})" id="reset-btn-${workout._id}" class="btn btn-danger" style="padding: 0.5rem 1rem;">
+                                🔄 Reset
+                            </button>
+                        </div>
+                        <div id="timer-status-${workout._id}" style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--color-text-light);">
+                            Ready to start
                         </div>
                     </div>
                     
@@ -278,6 +299,113 @@
         document.getElementById('filterType').addEventListener('change', filterAndDisplayWorkouts);
         document.getElementById('filterDate').addEventListener('change', filterAndDisplayWorkouts);
         document.getElementById('searchExercise').addEventListener('input', filterAndDisplayWorkouts);
+
+        // Timer functionality for workouts
+        const timers = {}; // Store timer states for each workout
+
+        function startTimer(workoutId, duration) {
+            if (timers[workoutId]?.interval) {
+                // Already running
+                return;
+            }
+
+            if (!timers[workoutId]) {
+                timers[workoutId] = {
+                    remaining: duration * 60,
+                    isPaused: false
+                };
+            }
+
+            const startBtn = document.getElementById(`start-btn-${workoutId}`);
+            const pauseBtn = document.getElementById(`pause-btn-${workoutId}`);
+            const statusDiv = document.getElementById(`timer-status-${workoutId}`);
+
+            startBtn.style.display = 'none';
+            pauseBtn.style.display = 'inline-block';
+            statusDiv.textContent = 'Workout in progress... 💪';
+            statusDiv.style.color = 'var(--color-success)';
+
+            timers[workoutId].interval = setInterval(() => {
+                timers[workoutId].remaining--;
+                updateTimerDisplay(workoutId);
+
+                if (timers[workoutId].remaining <= 0) {
+                    completeTimer(workoutId);
+                }
+            }, 1000);
+        }
+
+        function pauseTimer(workoutId) {
+            if (!timers[workoutId]?.interval) return;
+
+            clearInterval(timers[workoutId].interval);
+            timers[workoutId].interval = null;
+            timers[workoutId].isPaused = true;
+
+            const startBtn = document.getElementById(`start-btn-${workoutId}`);
+            const pauseBtn = document.getElementById(`pause-btn-${workoutId}`);
+            const statusDiv = document.getElementById(`timer-status-${workoutId}`);
+
+            startBtn.style.display = 'inline-block';
+            startBtn.textContent = '▶️ Resume';
+            pauseBtn.style.display = 'none';
+            statusDiv.textContent = 'Timer paused';
+            statusDiv.style.color = 'var(--color-accent)';
+        }
+
+        function resetTimer(workoutId, duration) {
+            if (timers[workoutId]?.interval) {
+                clearInterval(timers[workoutId].interval);
+            }
+
+            timers[workoutId] = {
+                remaining: duration * 60,
+                isPaused: false,
+                interval: null
+            };
+
+            const startBtn = document.getElementById(`start-btn-${workoutId}`);
+            const pauseBtn = document.getElementById(`pause-btn-${workoutId}`);
+            const statusDiv = document.getElementById(`timer-status-${workoutId}`);
+
+            startBtn.style.display = 'inline-block';
+            startBtn.textContent = '▶️ Start';
+            pauseBtn.style.display = 'none';
+            statusDiv.textContent = 'Ready to start';
+            statusDiv.style.color = 'var(--color-text-light)';
+
+            updateTimerDisplay(workoutId);
+        }
+
+        function completeTimer(workoutId) {
+            if (timers[workoutId]?.interval) {
+                clearInterval(timers[workoutId].interval);
+            }
+
+            const startBtn = document.getElementById(`start-btn-${workoutId}`);
+            const pauseBtn = document.getElementById(`pause-btn-${workoutId}`);
+            const statusDiv = document.getElementById(`timer-status-${workoutId}`);
+            const displayDiv = document.getElementById(`timer-display-${workoutId}`);
+
+            startBtn.style.display = 'inline-block';
+            startBtn.textContent = '▶️ Start';
+            pauseBtn.style.display = 'none';
+            statusDiv.textContent = '🎉 Workout Complete!';
+            statusDiv.style.color = 'var(--color-success)';
+            displayDiv.textContent = '00:00';
+
+            // Play a notification sound or show alert
+            alert('🎉 Workout timer completed! Great job!');
+        }
+
+        function updateTimerDisplay(workoutId) {
+            const displayDiv = document.getElementById(`timer-display-${workoutId}`);
+            if (!displayDiv || !timers[workoutId]) return;
+
+            const minutes = Math.floor(timers[workoutId].remaining / 60);
+            const seconds = timers[workoutId].remaining % 60;
+            displayDiv.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
     </script>
 
     <!-- Footer -->
