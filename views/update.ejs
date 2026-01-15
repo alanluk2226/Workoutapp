@@ -469,15 +469,20 @@
         // 載入訓練詳情
         async function loadWorkoutDetails(id) {
             try {
+                console.log('Fetching workout with ID:', id);
                 const response = await fetch(`/api/workouts/${id}`);
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Response data:', data);
 
                 if (data.success) {
                     const workout = data.workout;
+                    console.log('Workout data:', workout);
                     populateForm(workout);
                     document.getElementById('loadingMessage').style.display = 'none';
                     document.getElementById('workoutForm').style.display = 'block';
                 } else {
+                    console.error('API returned error:', data.error);
                     document.getElementById('loadingMessage').innerHTML = `
                         <div style="color: red; text-align: center;">
                             ❌ Error loading workout: ${data.error}
@@ -488,7 +493,7 @@
                 console.error('Error loading workout:', error);
                 document.getElementById('loadingMessage').innerHTML = `
                     <div style="color: red; text-align: center;">
-                        ❌ Network error. Please try again.
+                        ❌ Network error. Please try again. Error: ${error.message}
                     </div>
                 `;
             }
@@ -496,17 +501,28 @@
 
         // 填充表單數據
         function populateForm(workout) {
+            console.log('populateForm called with:', workout);
+            
             // Set the exercise name (this will trigger the field display)
-            document.getElementById('exerciseName').value = workout.exerciseName;
+            const exerciseNameField = document.getElementById('exerciseName');
+            if (!exerciseNameField) {
+                console.error('exerciseName field not found!');
+                return;
+            }
+            
+            exerciseNameField.value = workout.exerciseName;
+            console.log('Set exerciseName to:', workout.exerciseName);
             
             // Trigger the change event to show appropriate fields
             const event = new Event('change');
-            document.getElementById('exerciseName').dispatchEvent(event);
+            exerciseNameField.dispatchEvent(event);
             
             document.getElementById('timerMinutes').value = workout.duration;
-            document.getElementById('caloriesBurned').value = workout.caloriesBurned;e = workout.caloriesBurned;
+            document.getElementById('caloriesBurned').value = workout.caloriesBurned;
             document.getElementById('intensity').value = workout.intensity;
             document.getElementById('notes').value = workout.notes || '';
+
+            console.log('Basic fields populated');
 
             // Update timer display
             const minutes = workout.duration || 30;
@@ -516,6 +532,7 @@
 
             // Wait a bit for fields to be displayed, then populate them
             setTimeout(() => {
+                console.log('Populating sport-specific fields...');
                 // 填充特定字段
                 if (workout.sets) document.getElementById('sets').value = workout.sets;
                 if (workout.reps) document.getElementById('reps').value = workout.reps;
@@ -549,6 +566,8 @@
                 if (workout.songs) document.getElementById('songs').value = workout.songs;
                 if (workout.style) document.getElementById('style').value = workout.style;
                 if (workout.routines) document.getElementById('routines').value = workout.routines;
+                
+                console.log('All fields populated successfully');
             }, 100);
         }
 
