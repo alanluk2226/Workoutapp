@@ -752,6 +752,8 @@
             data.weight = data.weight ? parseFloat(data.weight) : undefined;
             data.distance = data.distance ? parseFloat(data.distance) : undefined;
 
+            console.log('Submitting workout update with data:', data);
+
             const submitBtn = e.target.querySelector('button[type="submit"]');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Updating...';
@@ -766,7 +768,9 @@
                     body: JSON.stringify(data)
                 });
 
+                console.log('Response status:', response.status);
                 const result = await response.json();
+                console.log('Response data:', result);
 
                 if (result.success) {
                     showNotification('✅ Workout updated successfully! Redirecting...', 'success');
@@ -777,6 +781,7 @@
                     showNotification(`❌ Error: ${result.error || 'Failed to update workout'}`, 'error');
                 }
             } catch (error) {
+                console.error('Submit error:', error);
                 showNotification('❌ Network error. Please try again.', 'error');
             } finally {
                 submitBtn.textContent = originalText;
