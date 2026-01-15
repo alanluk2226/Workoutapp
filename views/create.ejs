@@ -141,26 +141,9 @@
                     <label class="form-label" for="timerMinutes">Set Timer (minutes) *</label>
                     <input type="number" class="form-control" id="timerMinutes" name="timerMinutes" 
                            min="1" max="300" value="30" required>
-                </div>
-
-                <div class="timer-section" style="text-align: center; margin: 2rem 0; padding: 2rem; background: var(--color-card-bg); border: 1px solid rgba(0, 255, 127, 0.2); border-radius: var(--radius-lg);">
-                    <div class="timer-display" id="timerDisplay" style="font-size: 3rem; font-weight: bold; color: var(--color-neon-green); margin-bottom: 1rem; text-shadow: 0 0 10px rgba(0, 255, 127, 0.5);">
-                        30:00
-                    </div>
-                    <div class="timer-controls">
-                        <button type="button" id="startTimerBtn" class="btn btn-success" style="margin: 0 0.5rem;">
-                            ▶️ Start Timer
-                        </button>
-                        <button type="button" id="pauseTimerBtn" class="btn btn-secondary" style="margin: 0 0.5rem; display: none;">
-                            ⏸️ Pause
-                        </button>
-                        <button type="button" id="resetTimerBtn" class="btn btn-danger" style="margin: 0 0.5rem;">
-                            🔄 Reset
-                        </button>
-                    </div>
-                    <div id="timerStatus" style="margin-top: 1rem; font-weight: bold; color: var(--color-text-light);">
-                        Set your timer and click start to begin your workout!
-                    </div>
+                    <small style="color: var(--color-text-light); margin-top: 0.5rem; display: block;">
+                        Set the duration for your workout. You can start the timer from "My Workouts" page.
+                    </small>
                 </div>
 
                 <!-- 卡路里和強度 -->
@@ -368,121 +351,6 @@
     <script src="/js/chatbot.js"></script>
 
     <script>
-        // Timer functionality
-        let timerInterval;
-        let isTimerRunning = false;
-        let isPaused = false;
-        let totalSeconds = 0;
-        let remainingSeconds = 0;
-        let workoutStartTime = null;
-        let actualDuration = 0;
-
-        // Initialize timer display
-        function updateTimerDisplay() {
-            const minutes = Math.floor(remainingSeconds / 60);
-            const seconds = remainingSeconds % 60;
-            document.getElementById('timerDisplay').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // Update timer when input changes
-        document.getElementById('timerMinutes').addEventListener('input', function(e) {
-            if (!isTimerRunning) {
-                const minutes = parseInt(e.target.value) || 30;
-                totalSeconds = minutes * 60;
-                remainingSeconds = totalSeconds;
-                updateTimerDisplay();
-            }
-        });
-
-        // Start timer
-        document.getElementById('startTimerBtn').addEventListener('click', function() {
-            if (!isTimerRunning && !isPaused) {
-                const minutes = parseInt(document.getElementById('timerMinutes').value) || 30;
-                totalSeconds = minutes * 60;
-                remainingSeconds = totalSeconds;
-                workoutStartTime = new Date();
-            }
-
-            isTimerRunning = true;
-            isPaused = false;
-            
-            document.getElementById('startTimerBtn').style.display = 'none';
-            document.getElementById('pauseTimerBtn').style.display = 'inline-block';
-            document.getElementById('timerStatus').textContent = 'Workout in progress... Keep going! 💪';
-            document.getElementById('timerStatus').style.color = 'var(--color-success)';
-
-            timerInterval = setInterval(() => {
-                remainingSeconds--;
-                updateTimerDisplay();
-
-                if (remainingSeconds <= 0) {
-                    completeTimer();
-                }
-            }, 1000);
-        });
-
-        // Pause timer
-        document.getElementById('pauseTimerBtn').addEventListener('click', function() {
-            isTimerRunning = false;
-            isPaused = true;
-            clearInterval(timerInterval);
-            
-            document.getElementById('startTimerBtn').style.display = 'inline-block';
-            document.getElementById('startTimerBtn').textContent = '▶️ Resume';
-            document.getElementById('pauseTimerBtn').style.display = 'none';
-            document.getElementById('timerStatus').textContent = 'Timer paused. Click resume to continue.';
-            document.getElementById('timerStatus').style.color = 'var(--color-accent)';
-        });
-
-        // Reset timer
-        document.getElementById('resetTimerBtn').addEventListener('click', function() {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            isPaused = false;
-            workoutStartTime = null;
-            actualDuration = 0;
-            
-            const minutes = parseInt(document.getElementById('timerMinutes').value) || 30;
-            totalSeconds = minutes * 60;
-            remainingSeconds = totalSeconds;
-            updateTimerDisplay();
-            
-            document.getElementById('startTimerBtn').style.display = 'inline-block';
-            document.getElementById('startTimerBtn').textContent = '▶️ Start Timer';
-            document.getElementById('pauseTimerBtn').style.display = 'none';
-            document.getElementById('timerStatus').textContent = 'Set your timer and click start to begin your workout!';
-            document.getElementById('timerStatus').style.color = 'var(--color-text-light)';
-        });
-
-        // Complete timer
-        function completeTimer() {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            isPaused = false;
-            
-            // Calculate actual duration
-            if (workoutStartTime) {
-                actualDuration = Math.round((new Date() - workoutStartTime) / 1000 / 60);
-            }
-            
-            document.getElementById('timerDisplay').textContent = '00:00';
-            document.getElementById('startTimerBtn').style.display = 'inline-block';
-            document.getElementById('startTimerBtn').textContent = '▶️ Start Timer';
-            document.getElementById('pauseTimerBtn').style.display = 'none';
-            document.getElementById('timerStatus').textContent = '🎉 Workout Complete! Great job!';
-            document.getElementById('timerStatus').style.color = 'var(--color-success)';
-            
-            // Show completion notification
-            showNotification('🎉 Workout timer completed! Great job!', 'success');
-            
-            // Play completion sound (if supported)
-            try {
-                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
-                audio.play().catch(() => {}); // Ignore if audio fails
-            } catch (e) {}
-        }
-
         // 常見運動建議
         const exerciseSuggestions = [
             'Running', 'Walking', 'Cycling', 'Swimming', 'Yoga', 'Pilates',
@@ -1255,19 +1123,15 @@
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
 
-            // Add timer-related data
-            data.date = new Date().toISOString().split('T')[0]; // Current date
-            data.duration = actualDuration || parseInt(data.timerMinutes); // Use actual duration if timer was used
-            data.startTime = workoutStartTime ? workoutStartTime.toTimeString().slice(0, 5) : new Date().toTimeString().slice(0, 5);
+            // Add date and time data
+            const now = new Date();
+            data.date = now.toISOString().split('T')[0]; // Current date
+            data.duration = parseInt(data.timerMinutes); // Use timer minutes as duration
+            data.startTime = now.toISOString();
             
-            // Calculate end time
-            const endTime = new Date();
-            if (workoutStartTime && actualDuration) {
-                endTime.setTime(workoutStartTime.getTime() + (actualDuration * 60 * 1000));
-            } else {
-                endTime.setTime(endTime.getTime() + (parseInt(data.timerMinutes) * 60 * 1000));
-            }
-            data.endTime = endTime.toTimeString().slice(0, 5);
+            // Calculate end time based on duration
+            const endTime = new Date(now.getTime() + (parseInt(data.timerMinutes) * 60 * 1000));
+            data.endTime = endTime.toISOString();
 
             // 基本驗證
             if (!data.exerciseName || !data.timerMinutes || !data.caloriesBurned) {
